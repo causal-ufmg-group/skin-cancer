@@ -1,0 +1,20 @@
+name: skin_cancer
+channels:
+    - conda-forge
+dependencies:
+    - python=3.10
+    # ipywidgets 8.* does not work with jupyter in vscode
+    - ipywidgets=7.7.2
+    - pytorch
+    - torchvision
+    - pytorch-lightning
+    - numpy
+    - pandas
+    - matplotlib
+    - scikit-learn
+    - opencv
+    - pillow
+    - isort
+    - black
+    - flake8
+    - jupyter
