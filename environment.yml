@@ -12,9 +12,11 @@ dependencies:
     - pandas
     - matplotlib
     - scikit-learn
-    - opencv
     - pillow
     - isort
     - black
     - flake8
     - jupyter
+    - pip
+    - pip:
+        - grad-cam
