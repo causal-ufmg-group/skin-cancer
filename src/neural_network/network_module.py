@@ -85,6 +85,18 @@ class NetworkModule(pl.LightningModule):
         self.test_expected.append(y)
         self.test_prediction.append(y_predictions)
 
+    def clear_test_predictions_variables(self) -> None:
+
+        """
+        Empties self.test_expected and self.test_prediction.
+        """
+
+        del self.test_expected
+        del self.test_prediction
+
+        self.test_expected = []
+        self.test_prediction = []
+
     def configure_optimizers(self) -> torch.optim.Adam:
 
         return torch.optim.Adam(self.parameters(), lr=self.learning_rate)
