@@ -1,7 +1,7 @@
 import pytorch_lightning as pl
-import torch
 import torch.nn as nn
 import torch.nn.functional as F
+from torch import Tensor, argmax, optim
 from torchmetrics.functional import accuracy
 
 
@@ -38,17 +38,17 @@ class NetworkModule(pl.LightningModule):
         self.test_expected = []
         self.test_prediction = []
 
-    def forward(self, x: torch.Tensor) -> torch.Tensor:
+    def forward(self, x: Tensor) -> Tensor:
 
         x = self.model(x)
 
         return F.softmax(x, dim=1)
 
-    def training_step(self, batch: torch.Tensor, batch_idx: int) -> torch.Tensor:
+    def training_step(self, batch: tuple[Tensor, Tensor], batch_idx: int) -> Tensor:
 
         x, y = batch
         logits = self(x)
-        y_predictions = torch.argmax(logits, dim=1)
+        y_predictions = argmax(logits, dim=1)
 
         loss = F.nll_loss(logits, y)
         self.log("train_loss", loss, logger=True, on_epoch=True, prog_bar=True)
@@ -58,11 +58,11 @@ class NetworkModule(pl.LightningModule):
 
         return loss
 
-    def validation_step(self, batch: torch.Tensor, batch_idx: int) -> None:
+    def validation_step(self, batch: tuple[Tensor, Tensor], batch_idx: int) -> None:
 
         x, y = batch
         logits = self(x)
-        y_predictions = torch.argmax(logits, dim=1)
+        y_predictions = argmax(logits, dim=1)
 
         loss = F.nll_loss(logits, y)
         self.log("val_loss", loss, logger=True, on_epoch=True, prog_bar=True)
@@ -70,11 +70,11 @@ class NetworkModule(pl.LightningModule):
         acc = accuracy(y_predictions, y)
         self.log("val_acc", acc, logger=True, on_epoch=True, prog_bar=True)
 
-    def test_step(self, batch: torch.Tensor, batch_idx: int) -> None:
+    def test_step(self, batch: tuple[Tensor, Tensor], batch_idx: int) -> None:
 
         x, y = batch
         logits = self(x)
-        y_predictions = torch.argmax(logits, dim=1)
+        y_predictions = argmax(logits, dim=1)
 
         loss = F.cross_entropy(logits, y)
         self.log("test_loss", loss, logger=True, on_epoch=True, prog_bar=True)
@@ -97,6 +97,6 @@ class NetworkModule(pl.LightningModule):
         self.test_expected = []
         self.test_prediction = []
 
-    def configure_optimizers(self) -> torch.optim.Adam:
+    def configure_optimizers(self) -> optim.Adam:
 
-        return torch.optim.Adam(self.parameters(), lr=self.learning_rate)
+        return optim.Adam(self.parameters(), lr=self.learning_rate)
