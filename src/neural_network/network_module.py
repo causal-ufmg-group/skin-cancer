@@ -36,7 +36,7 @@ class NetworkModule(pl.LightningModule):
         self.learning_rate = learning_rate
 
         self.test_expected = []
-        self.test_prediction = []
+        self.test_probabilities = []
 
     def forward(self, x: Tensor) -> Tensor:
 
@@ -83,19 +83,19 @@ class NetworkModule(pl.LightningModule):
         self.log("test_acc", acc, logger=True, on_epoch=True, prog_bar=True)
 
         self.test_expected.append(y)
-        self.test_prediction.append(y_predictions)
+        self.test_probabilities.append(logits)
 
     def clear_test_predictions_variables(self) -> None:
 
         """
-        Empties self.test_expected and self.test_prediction.
+        Empties self.test_expected and self.test_probabilities.
         """
 
         del self.test_expected
-        del self.test_prediction
+        del self.test_probabilities
 
         self.test_expected = []
-        self.test_prediction = []
+        self.test_probabilities = []
 
     def configure_optimizers(self) -> optim.Adam:
 
