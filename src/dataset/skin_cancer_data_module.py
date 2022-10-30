@@ -88,15 +88,24 @@ class SkinCancerDataModule(pl.LightningDataModule):
 
     def train_dataloader(self) -> DataLoader:
         return DataLoader(
-            self.train, batch_size=self.batch_size, num_workers=self.num_workers
+            self.train,
+            shuffle=True,
+            batch_size=self.batch_size,
+            num_workers=self.num_workers,
         )
 
     def val_dataloader(self) -> DataLoader:
         return DataLoader(
-            self.validation, batch_size=self.batch_size, num_workers=self.num_workers
+            self.validation,
+            shuffle=True,
+            batch_size=self.batch_size,
+            num_workers=self.num_workers,
         )
 
     def test_dataloader(self) -> DataLoader:
         return DataLoader(
-            self.test, batch_size=self.batch_size, num_workers=self.num_workers
+            self.test,
+            shuffle=True,
+            batch_size=self.batch_size,
+            num_workers=self.num_workers,
         )
