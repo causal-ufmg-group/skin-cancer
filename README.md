@@ -21,6 +21,6 @@ conda activate skin_cancer
 ## **Dataset**
 
 Datasets used can be found in the following webpages: 
-    - [ISIC2018 - Task3](https://challenge.isic-archive.com/data/#2018)
-    - [ISIC2018 - Supplemental Information](https://forum.isic-archive.com/t/task-3-supplemental-information/430)
-    - [ISIC2019 - Task1](https://challenge.isic-archive.com/data/#2019)
+- [ISIC2018 - Task3](https://challenge.isic-archive.com/data/#2018)
+- [ISIC2018 - Supplemental Information](https://forum.isic-archive.com/t/task-3-supplemental-information/430)
+- [ISIC2019 - Task1](https://challenge.isic-archive.com/data/#2019)
