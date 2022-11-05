@@ -17,6 +17,14 @@ LABELS_CSV = {
     ),
 }
 
+DOMAIN_TRAIN_CSV = (
+    CWD.parent
+    / "data"
+    / "ISIC2018_Task3_Training_GroundTruth"
+    / "ISIC2018_Task3_Training_LesionGroupings.csv"
+)
+
+
 IMG_DIR = {
     "train": CWD.parent / "data" / "ISIC2018_Task3_Training_Input/",
     "test": CWD.parent / "data" / "ISIC2018_Task3_Validation_Input/",

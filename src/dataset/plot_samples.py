@@ -41,11 +41,11 @@ def plot_some_samples(
 
     for i, ax in enumerate(flat_axs):
 
-        img, label_pos = dataset[i]
+        img, label_pos, *domain = dataset[i]
 
         label = classes[label_pos]
 
-        ax.set_title(f"Sample #{i} - {label}")
+        ax.set_title(f"Sample #{i} - {label}. Domain: {domain}")
         ax.imshow(to_pil_image(img.type(torch.uint8)))
         ax.axis("off")
 

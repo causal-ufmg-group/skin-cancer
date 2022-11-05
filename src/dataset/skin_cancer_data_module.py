@@ -25,6 +25,8 @@ class SkinCancerDataModule(pl.LightningDataModule):
         batch_size: int,
         dataloader_num_workers: int,
         transform: Optional[Callable] = None,
+        domain_csv: Optional[Path] = None,
+        domain_col: Optional[str] = None,
     ) -> None:
 
         """
@@ -52,6 +54,17 @@ class SkinCancerDataModule(pl.LightningDataModule):
                 Transformations to be applied after loading image tensors.
 
                 If None, no transformation will be applied.
+
+            domain_csv: Optional[Path]
+
+                Path to file containing the respective domain of each image.
+
+                This file should be a .csv with image filepath as the first
+                column and its respective classification label as the second.
+
+            domain_col: Optional[str]
+
+                Column name where domain information is stored in domain_csv.
         """
         super().__init__()
 
@@ -60,6 +73,9 @@ class SkinCancerDataModule(pl.LightningDataModule):
         self.batch_size = batch_size
         self.num_workers = dataloader_num_workers
         self.transform = transform
+
+        self.domain_csv = domain_csv
+        self.domain_col = domain_col
 
     def prepare_data(self) -> None:
         super().prepare_data()
@@ -72,6 +88,8 @@ class SkinCancerDataModule(pl.LightningDataModule):
                 self.ground_truth_map["train"],
                 self.img_dir_map["train"],
                 self.transform,
+                self.domain_csv,
+                self.domain_col,
             )
 
             num_img = len(full_train)
@@ -83,7 +101,12 @@ class SkinCancerDataModule(pl.LightningDataModule):
         if stage in ("test", None):
 
             self.test = SkinCancerDataset(
-                self.ground_truth_map["test"], self.img_dir_map["test"], self.transform
+                self.ground_truth_map["test"],
+                self.img_dir_map["test"],
+                self.transform,
+                # no domain information necessary for testing
+                domain_csv=None,
+                domain_col=None,
             )
 
     def train_dataloader(self) -> DataLoader:
