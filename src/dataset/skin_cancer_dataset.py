@@ -48,7 +48,7 @@ class SkinCancerDataset(Dataset):
 
                 Path to file containing the respective domain of each image.
 
-                This file should have the sa
+                This file should be sorted in the same order as labels_csv.
 
             domain_col: Optional[str]
 
