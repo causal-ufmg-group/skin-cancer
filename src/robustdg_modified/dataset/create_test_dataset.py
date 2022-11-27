@@ -8,7 +8,7 @@ from robustdg_modified.config.args_mock import ArgsMock
 from .test_dataset import TestDataset
 
 
-def create_test_dataset(
+def create_robustdg_test_dataset(
     args: ArgsMock,
     img_dir: Path,
     int_to_img_names: pd.Series,

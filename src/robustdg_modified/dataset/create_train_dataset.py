@@ -57,7 +57,7 @@ def _get_base_domain_size(self) -> int:
     return base_domain_size
 
 
-def create_train_dataset(
+def create_robustdg_train_dataset(
     args: ArgsMock,
     img_dir: Path,
     int_to_img_names: pd.Series,
