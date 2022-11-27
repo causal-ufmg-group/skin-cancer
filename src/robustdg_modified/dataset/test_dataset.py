@@ -127,11 +127,11 @@ class TestDataset(Dataset):
 
     def __getitem__(self, idx: int) -> tuple[Tensor, Tensor, int]:
 
-        img_filename = self.int_to_img_names[idx]
+        img_filename = self.int_to_img_names.loc[idx]
         img_path = self.img_dir / f"{img_filename}.jpg"
         image = read_image(str(img_path)).float()
 
-        img_label = self.img_one_hot_labels[idx]
+        img_label = self.img_one_hot_labels.loc[idx]
 
         if self.transform:
             image: Tensor = self.transform(image)

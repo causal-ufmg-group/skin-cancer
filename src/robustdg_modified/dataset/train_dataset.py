@@ -152,12 +152,12 @@ class TrainDataset(Dataset):
 
     def __getitem__(self, idx: int) -> tuple[Tensor, Tensor, Tensor, int, Tensor]:
 
-        img_filename = self.int_to_img_names[idx]
+        img_filename = self.int_to_img_names.loc[idx]
         img_path = self.img_dir / f"{img_filename}.jpg"
         image = read_image(str(img_path)).float()
 
-        img_label = self.img_one_hot_labels[idx]
-        img_domain = self.img_one_hot_domain[idx]
+        img_label = self.img_one_hot_labels.loc[idx]
+        img_domain = self.img_one_hot_domain.loc[idx]
         # TODO: Object is the same as the label because we are trying
         #       to identify is its melanoma type, i.e., its class
         img_object = img_label
