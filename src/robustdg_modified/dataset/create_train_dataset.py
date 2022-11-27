@@ -5,8 +5,8 @@ import numpy.typing as npt
 import pandas as pd
 
 from ..args_mock import ArgsMock
-from ..utils import convert_one_hot_to_integers
 from .train_dataset import TrainDataset
+from .utils.one_hot_encoding import convert_one_hot_to_integers
 
 
 def _get_num_imgs_for_each_domain(
