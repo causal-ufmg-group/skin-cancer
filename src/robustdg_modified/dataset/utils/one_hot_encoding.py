@@ -1,4 +1,5 @@
 import numpy.typing as npt
+import pandas as pd
 from torch import Tensor
 
 
@@ -27,3 +28,32 @@ def convert_one_hot_to_integers(
     """
 
     return one_hot_encoded.argmax(axis=1)
+
+
+def convert_one_hot_df_to_names(
+    one_hot_df: pd.DataFrame, series_name: str
+) -> pd.Series:
+
+    """
+    Converts one hot encoding pd.DataFrame to a pd.Series
+    of strings.
+
+    ----
+    Parameters:
+
+        one_hot_df: pd.DataFrame
+
+            DataFrame with one-hot encoding as its only columns.
+
+        series_names: str
+
+            What to call the resulting series.
+    -----
+    Returns:
+
+        pd.Series
+
+            Series mapping each row to its class.
+    """
+
+    return one_hot_df.idxmax(axis=1).rename(series_name)
