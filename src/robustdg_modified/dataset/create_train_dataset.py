@@ -11,15 +11,23 @@ from .utils.one_hot_encoding import convert_one_hot_to_integers
 
 
 def _get_num_imgs_for_each_domain(
-    one_hot_domains: npt.NDArray, domains: list[str]
+    one_hot_domains: npt.NDArray, domain_names: list[str]
 ) -> int:
 
     integer_domains = convert_one_hot_to_integers(one_hot_domains)
 
-    return [(integer_domains == domain).sum() for domain in domains]
+    return [
+        (integer_domains == domain_number).sum()
+        for domain_number, _ in enumerate(domain_names)
+    ]
 
 
-def _get_base_domain_size(self) -> int:
+def _get_base_domain_size(
+    args: ArgsMock,
+    one_hot_labels: npt.NDArray,
+    one_hot_domains: npt.NDArray,
+    domain_names: list[str],
+) -> int:
 
     r"""
     Base domain size seems to be the sum of max number of elements in a domain
@@ -34,14 +42,14 @@ def _get_base_domain_size(self) -> int:
 
     base_domain_size = 0
 
-    integer_domain = convert_one_hot_to_integers(self.img_one_hot_domain.to_numpy())
-    integer_labels = convert_one_hot_to_integers(self.img_one_hot_labels.to_numpy())
+    integer_domain = convert_one_hot_to_integers(one_hot_domains)
+    integer_labels = convert_one_hot_to_integers(one_hot_labels)
 
-    for label_number in range(self.args.out_classes):
+    for label_number in range(args.out_classes):
 
         base_class_size = 0
 
-        for domain_number, _ in enumerate(self.domain_names):
+        for domain_number, _ in enumerate(domain_names):
 
             domain_idx: npt.NDArray = integer_domain == domain_number
             labels_this_domain: npt.NDArray = integer_labels[domain_idx]
@@ -111,7 +119,10 @@ def create_robustdg_train_dataset(
 
     # Calculating some required RobustDG parameters
     domain_names = domain_df.columns.to_list()
-    base_domain_size = _get_base_domain_size()
+
+    base_domain_size = _get_base_domain_size(
+        args, labels_df.to_numpy(), domain_df.to_numpy(), domain_names
+    )
     training_list_size = _get_num_imgs_for_each_domain(
         domain_df.to_numpy(), domain_names
     )
