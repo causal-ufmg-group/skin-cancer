@@ -1,4 +1,4 @@
-from typing import Callable, Sequence
+from typing import Sequence
 
 import matplotlib.pyplot as plt
 import torch
@@ -12,7 +12,6 @@ def _plot_some_samples(
     dataset: Dataset,
     classes: Sequence[str],
     domains: Sequence[str],
-    adapter_func: Callable,
 ) -> None:
 
     """
@@ -46,9 +45,7 @@ def _plot_some_samples(
 
     for i, ax in enumerate(flat_axs):
 
-        # adapter_func is a function required as parameters in order to
-        # make both train and test datasets available for this template
-        img, label_pos, domain, idx, object_ = adapter_func(dataset[i])
+        img, label_pos, domain, idx, object_ = dataset[i]
 
         # label_pos and domain are one-hot encoded
         label = classes[label_pos.argmax()]
@@ -93,7 +90,7 @@ def plot_some_train_samples(
             that is, index zero should contain the name for encoding
             [1, 0, ..., 0].
     """
-    _plot_some_samples(nrows, ncols, dataset, classes, domains, lambda x: x)
+    _plot_some_samples(nrows, ncols, dataset, classes, domains)
 
 
 def plot_some_test_samples(
@@ -127,11 +124,4 @@ def plot_some_test_samples(
             that is, index zero should contain the name for encoding
             [1, 0, ..., 0].
     """
-
-    def _adapter_func(dataset_input):
-
-        img, label_pos, idx, *_ = dataset_input
-
-        return img, label_pos, None, idx, label_pos
-
-    _plot_some_samples(nrows, ncols, dataset, classes, None, _adapter_func)
+    _plot_some_samples(nrows, ncols, dataset, classes, None)
