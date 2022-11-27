@@ -4,7 +4,8 @@ from typing import Callable, Optional
 import numpy.typing as npt
 import pandas as pd
 
-from ..args_mock import ArgsMock
+from robustdg_modified.config.args_mock import ArgsMock
+
 from .train_dataset import TrainDataset
 from .utils.one_hot_encoding import convert_one_hot_to_integers
 

@@ -3,7 +3,8 @@ from typing import Callable, Optional
 
 import pandas as pd
 
-from ..args_mock import ArgsMock
+from robustdg_modified.config.args_mock import ArgsMock
+
 from .test_dataset import TestDataset
 
 

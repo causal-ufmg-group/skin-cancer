@@ -6,7 +6,7 @@ from torch import Tensor
 from torch.utils.data import Dataset
 from torchvision.io import read_image
 
-from ..args_mock import ArgsMock
+from robustdg_modified.config.args_mock import ArgsMock
 
 
 class TrainDataset(Dataset):
