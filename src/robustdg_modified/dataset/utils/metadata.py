@@ -6,7 +6,7 @@ import pandas as pd
 from torchvision.io import read_image
 
 
-def get_classes(labels_csv_path: Path) -> np.ndarray:
+def get_one_hot_encoded_names(one_hot_encoded_df: pd.DataFrame) -> np.ndarray:
 
     """
     Get classification labels.
@@ -14,10 +14,11 @@ def get_classes(labels_csv_path: Path) -> np.ndarray:
     ----
     Parameters:
 
-        labels_csv_path: Path
+        one_hot_encoded_df: Path
 
-            Path to .csv file with one-hot-encoding information.
+            DataFrame with one-hot encoding information.
 
+            Only columns should be the one-hot encoded ones.
     ----
     Returns:
 
@@ -25,13 +26,7 @@ def get_classes(labels_csv_path: Path) -> np.ndarray:
 
             Arrays with label names.
     """
-
-    train_classes = pd.read_csv(labels_csv_path, skiprows=lambda row: row != 0)
-
-    # ignore first column since it only stores image name
-    desired_columns = train_classes.columns[1:]
-
-    return np.array(desired_columns.to_list())
+    return np.array(one_hot_encoded_df.columns.to_list())
 
 
 def get_image_dimensions(img_dir: Path) -> tuple[int, int, int]:
