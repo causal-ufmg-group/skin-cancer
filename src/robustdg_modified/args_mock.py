@@ -1,4 +1,4 @@
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 
 
 @dataclass
@@ -77,8 +77,10 @@ class ArgsMock:
     # UNNECESSARY PARAMETERS
     # ------------------------------
 
-    train_domains: list[str] = ["15", "30", "45", "60", "75"]
-    test_domains: list[str] = ["0", "90"]
+    train_domains: list[str] = field(
+        default_factory=lambda: ["15", "30", "45", "60", "75"]
+    )
+    test_domains: list[str] = field(default_factory=lambda: ["0", "90"])
 
     mnist_seed: int = 0
     cuda_device: int = 0

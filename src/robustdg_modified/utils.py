@@ -1,12 +1,10 @@
-from typing import NewType
-
 import numpy.typing as npt
 from torch import Tensor
 
-ArrayTensor = NewType("ArrayTensor", npt.NDArray, Tensor)
 
-
-def convert_one_hot_to_integers(one_hot_encoded: ArrayTensor) -> ArrayTensor:
+def convert_one_hot_to_integers(
+    one_hot_encoded: npt.NDArray | Tensor,
+) -> npt.NDArray | Tensor:
 
     """
     Converts one hot encoding to tensor/array of integers.
