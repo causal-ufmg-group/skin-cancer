@@ -79,7 +79,6 @@ class ErmMatch(BaseAlgo):
         """
 
         super().__init__(
-            self,
             args,
             post_string,
             cuda,

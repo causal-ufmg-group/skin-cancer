@@ -77,7 +77,6 @@ class NoDomain(BaseAlgo):
                 robustdg_modified.dataset.TestDataset.
         """
         super().__init__(
-            self,
             args,
             f"NO_DOMAIN_{run}_",
             cuda,
