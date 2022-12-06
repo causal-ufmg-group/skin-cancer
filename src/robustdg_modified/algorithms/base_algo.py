@@ -120,10 +120,12 @@ class BaseAlgo:
         self.val_dataset = data_loaders["validation"]
         self.test_dataset = data_loaders["test"]
 
-        self.train_domains = self.train_dataset.dataset.list_domains
+        self.train_domains: list[str] = self.train_dataset.dataset.list_domains
         self.total_domains = len(self.train_domains)
-        self.domain_size = self.train_dataset.dataset.base_domain_size
-        self.training_list_size = self.train_dataset.dataset.training_list_size
+        self.domain_size: int = self.train_dataset.dataset.base_domain_size
+        self.training_list_size: list[
+            int
+        ] = self.train_dataset.dataset.training_list_size
 
         # Neural Network information
         self.phi = model
