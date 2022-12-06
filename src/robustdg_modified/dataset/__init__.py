@@ -13,6 +13,7 @@ from .create_test_dataset import create_robustdg_test_dataset
 from .create_train_dataset import create_robustdg_train_dataset
 from .test_dataset import TestDataset
 from .train_dataset import TrainDataset
+from .train_val_split import get_only_desired_indexes, get_split_train_validation_index
 
 __all__ = [
     "read",
@@ -21,4 +22,6 @@ __all__ = [
     "create_robustdg_train_dataset",
     "TestDataset",
     "TrainDataset",
+    "get_only_desired_indexes",
+    "get_split_train_validation_index",
 ]
