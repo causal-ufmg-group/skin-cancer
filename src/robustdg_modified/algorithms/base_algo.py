@@ -123,7 +123,7 @@ class BaseAlgo:
         self.train_domains = self.train_dataset.dataset.list_domains
         self.total_domains = len(self.train_domains)
         self.domain_size = self.train_dataset.dataset.base_domain_size
-        self.training_list_size = self.train_dataset.dataset.domain_size_list
+        self.training_list_size = self.train_dataset.dataset.training_list_size
 
         # Neural Network information
         self.phi = model
