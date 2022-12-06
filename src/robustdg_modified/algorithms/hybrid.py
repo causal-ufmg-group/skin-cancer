@@ -6,8 +6,8 @@ from torch import nn, optim
 from torch.nn import functional as F
 from torch.utils.data import DataLoader
 
-from robustdg.utils.helper import cosine_similarity
 from robustdg_modified.config.args_mock import ArgsMock
+from robustdg_modified.utils.helper import cosine_similarity
 
 from .base_algo import BaseAlgo, TrainValTest
 

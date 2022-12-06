@@ -8,8 +8,8 @@ from more_itertools import chunked
 from torch import nn, optim
 from torch.utils.data import DataLoader
 
-from robustdg.utils.match_function import get_matched_pairs
 from robustdg_modified.config.args_mock import ArgsMock
+from robustdg_modified.utils.match_function import get_matched_pairs
 
 TrainValTest = Literal["train", "validation", "test"]
 
