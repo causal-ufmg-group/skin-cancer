@@ -131,7 +131,7 @@ class TestDataset(Dataset):
         img_path = self.img_dir / f"{img_filename}.jpg"
         image = read_image(str(img_path)).float()
 
-        img_label = self.img_one_hot_labels.loc[idx]
+        img_label = self.img_one_hot_labels.loc[idx].to_numpy()
 
         if self.transform:
             image: Tensor = self.transform(image)
