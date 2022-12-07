@@ -9,7 +9,10 @@ from torch import nn, optim
 from torch.utils.data import DataLoader
 
 from robustdg_modified.config.args_mock import ArgsMock
-from robustdg_modified.utils.match_function import get_matched_pairs
+from robustdg_modified.utils.match_function import (
+    get_matched_pairs,
+    load_images_from_indexes,
+)
 
 TrainValTest = Literal["train", "validation", "test"]
 
@@ -196,7 +199,13 @@ class BaseAlgo:
             label_temp = []
             for d_i in range(len(curr_data_matched[idx])):
                 key = random.choice(curr_data_matched[idx][d_i])
-                data_temp.append(self.domain_data[d_i]["data"][key])
+
+                # Changed to only load image now
+                # data_temp.append(self.domain_data[d_i]["data"][key])
+                data_temp.append(
+                    # indexing at [0], since this function will add a new axis
+                    load_images_from_indexes(self.train_dataset.dataset, [key])[0]
+                )
                 label_temp.append(self.domain_data[d_i]["label"][key])
 
             data_match_tensor.append(torch.stack(data_temp))

@@ -1,8 +1,24 @@
+"""
+Changes:
+
+    Loading all images into RAM is not viable, so it only loads them when necessary now.
+        These changes can be found in comments prefixed by "Changed to ..."
+
+        They can be found in:
+            1) this file
+            2) robustdg_modified/algorithms/base_algo.py
+
+    Created helper function to load images from indexes.
+        function: load_images_from_indexes
+"""
+
+from typing import Iterable
+
 import numpy as np
 import torch
 from scipy.stats import bernoulli
 from torch import nn
-from torch.utils.data import DataLoader
+from torch.utils.data import DataLoader, Dataset
 
 from robustdg_modified.config.args_mock import ArgsMock
 
@@ -18,13 +34,46 @@ def init_data_match_dict(args: ArgsMock, keys, vals, variation):
         else:
             val_dim = vals
 
-        data[key]["data"] = torch.rand((val_dim, args.img_c, args.img_w, args.img_h))
+        # Changed to ignore it
+        # data[key]["data"] = torch.rand((val_dim, args.img_c, args.img_w, args.img_h))
 
         data[key]["label"] = torch.rand((val_dim, 1))
         data[key]["idx"] = torch.randint(0, 1, (val_dim, 1))
         data[key]["obj"] = torch.randint(0, 1, (val_dim, 1))
 
     return data
+
+
+def load_images_from_indexes(
+    dataset: Dataset, indexes: Iterable[torch.Tensor | int]
+) -> torch.Tensor:
+
+    """
+    Load various images from their indexes.
+
+    Helper function to avoid loading all images into memory at once.
+
+    ----
+    Parameters:
+
+        dataloader: torch.utils.data.Dataset
+
+            Dataset from which to load images.
+
+        indexes: Iterable[torch.Tensor | int]
+            List of indexes (each index can be Tensor containing only a number)
+
+    ----
+    Returns:
+
+        torch.Tensor
+
+            Tensor with all images stacked.
+
+            Shape will be: [len(indexes), num_channels, img_height, img_width]
+    """
+
+    return torch.stack([dataset[int(i)][0] for i in indexes[3]])
 
 
 def get_matched_pairs(
@@ -80,7 +129,12 @@ def get_matched_pairs(
                 for idx in range(ordered_indices.shape[0]):
                     # Matching points across domains
                     perfect_indice = ordered_indices[idx].item()
-                    domain_data[domain_idx]["data"][perfect_indice] = x_e[indices][idx]
+
+                    # No need to store it into memory
+                    # domain_data[domain_idx]["data"][
+                    #   perfect_indice
+                    # ] = x_e[indices][idx]
+
                     domain_data[domain_idx]["label"][perfect_indice] = y_e[indices][idx]
                     domain_data[domain_idx]["idx"][perfect_indice] = idx_e[indices][idx]
                     domain_data[domain_idx]["obj"][perfect_indice] = obj_e[indices][idx]
@@ -98,7 +152,12 @@ def get_matched_pairs(
                 for idx in range(ordered_indices.shape[0]):
                     # Matching points across domains
                     perfect_indice = ordered_indices[idx].item()
-                    domain_data[domain_idx]["data"][perfect_indice] = x_e[indices][idx]
+
+                    # No need to store it into memory
+                    # domain_data[domain_idx]["data"][
+                    #   perfect_indice
+                    # ] = x_e[indices][idx]
+
                     domain_data[domain_idx]["label"][perfect_indice] = y_e[indices][idx]
                     domain_data[domain_idx]["idx"][perfect_indice] = idx_e[indices][idx]
                     domain_data[domain_idx]["obj"][perfect_indice] = obj_e[indices][idx]
@@ -165,26 +224,47 @@ def get_matched_pairs(
             curr_size = ordered_curr_indices.shape[0]
 
             if inferred_match == 1:
-                base_feat_data = domain_data[base_domain_idx]["data"][indices_base]
+
+                # Changed to indexes
+                # base_feat_data = domain_data[base_domain_idx]["data"][indices_base]
+
+                base_feat_data = domain_data[base_domain_idx]["idx"][indices_base]
                 base_feat_data_split = torch.split(
                     base_feat_data, args.batch_size, dim=0
                 )
                 base_feat = []
+
+                # Changed to only load images when needed
                 for batch_feat in base_feat_data_split:
                     with torch.no_grad():
-                        batch_feat = batch_feat.to(cuda)
-                        out = phi(batch_feat)
+                        imgs_feat = load_images_from_indexes(
+                            train_dataset.dataset, batch_feat
+                        ).to(cuda)
+                        out = phi(imgs_feat)
                         base_feat.append(out.cpu())
+
+                    del imgs_feat
+
                 base_feat = torch.cat(base_feat)
 
-                feat_x_data = domain_data[domain_idx]["data"][indices_curr]
+                # Changed to indexes
+                # feat_x_data = domain_data[domain_idx]["data"][indices_curr]
+
+                feat_x_data = domain_data[domain_idx]["idx"][indices_curr]
                 feat_x_data_split = torch.split(feat_x_data, args.batch_size, dim=0)
                 feat_x = []
+
+                # Changed to only load images when needed
                 for batch_feat in feat_x_data_split:
                     with torch.no_grad():
-                        batch_feat = batch_feat.to(cuda)
-                        out = phi(batch_feat)
+                        imgs_feat = load_images_from_indexes(
+                            train_dataset.dataset, batch_feat
+                        ).to(cuda)
+                        out = phi(imgs_feat)
                         feat_x.append(out.cpu())
+
+                    del imgs_feat
+
                 feat_x = torch.cat(feat_x)
 
                 for idx in range(ordered_base_indices.shape[0]):
