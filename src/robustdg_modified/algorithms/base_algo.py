@@ -189,22 +189,34 @@ class BaseAlgo:
         return data_matched, domain_data
 
     def get_match_function_batch(self, batch_idx):
+
         curr_data_matched = self.data_matched[batch_idx]
         curr_batch_size = len(curr_data_matched)
 
         data_match_tensor = []
         label_match_tensor = []
+
         for idx in range(curr_batch_size):
+
             data_temp = []
             label_temp = []
+
             for d_i in range(len(curr_data_matched[idx])):
+
+                # Changed to continue if there is no example for this domain
+                if not curr_data_matched[idx][d_i]:
+                    continue
+
                 key = random.choice(curr_data_matched[idx][d_i])
 
                 # Changed to only load image now
                 # data_temp.append(self.domain_data[d_i]["data"][key])
                 data_temp.append(
                     # indexing at [0], since this function will add a new axis
-                    load_images_from_indexes(self.train_dataset.dataset, [key])[0]
+                    load_images_from_indexes(
+                        self.train_dataset.dataset,
+                        [self.domain_data[d_i]["data_idx"][key]],
+                    )[0]
                 )
                 label_temp.append(self.domain_data[d_i]["label"][key])
 

@@ -8,6 +8,9 @@ Changes:
             1) this file
             2) robustdg_modified/algorithms/base_algo.py
 
+        Separated domain index from image index. The latter is necessary for
+        loading images only when necessary.
+
     Created helper function to load images from indexes.
         function: load_images_from_indexes
 """
@@ -36,6 +39,7 @@ def init_data_match_dict(args: ArgsMock, keys, vals, variation):
 
         # Changed to ignore it
         # data[key]["data"] = torch.rand((val_dim, args.img_c, args.img_w, args.img_h))
+        data[key]["data_idx"] = torch.randint(0, 1, (val_dim, 1))
 
         data[key]["label"] = torch.rand((val_dim, 1))
         data[key]["idx"] = torch.randint(0, 1, (val_dim, 1))
@@ -122,18 +126,26 @@ def get_matched_pairs(
             y_e = torch.argmax(y_e, dim=1)
             d_e = torch.argmax(d_e, dim=1).numpy()
 
+            # Changed to have both image and domain indexes
+            data_idx = idx_e[:, 0]  # image index
+            idx_e = idx_e[:, 1]  # domain index
+
             domain_indices = np.unique(d_e)
             for domain_idx in domain_indices:
+
                 indices = d_e == domain_idx
                 ordered_indices = idx_e[indices]
+
                 for idx in range(ordered_indices.shape[0]):
                     # Matching points across domains
                     perfect_indice = ordered_indices[idx].item()
 
-                    # No need to store it into memory
+                    # Changed to not need to store it into memory, save idx instead
                     # domain_data[domain_idx]["data"][
                     #   perfect_indice
                     # ] = x_e[indices][idx]
+                    img_index = data_idx[indices][idx]
+                    domain_data[domain_idx]["data_idx"][perfect_indice] = img_index
 
                     domain_data[domain_idx]["label"][perfect_indice] = y_e[indices][idx]
                     domain_data[domain_idx]["idx"][perfect_indice] = idx_e[indices][idx]
@@ -145,18 +157,26 @@ def get_matched_pairs(
             y_e = torch.argmax(y_e, dim=1)
             d_e = torch.argmax(d_e, dim=1).numpy()
 
+            # Changed to have both image and domain indexes
+            data_idx = idx_e[:, 0]  # image index
+            idx_e = idx_e[:, 1]  # domain index
+
             domain_indices = np.unique(d_e)
             for domain_idx in domain_indices:
+
                 indices = d_e == domain_idx
                 ordered_indices = idx_e[indices]
+
                 for idx in range(ordered_indices.shape[0]):
                     # Matching points across domains
                     perfect_indice = ordered_indices[idx].item()
 
-                    # No need to store it into memory
+                    # Changed to not need to store it into memory, save idx instead
                     # domain_data[domain_idx]["data"][
                     #   perfect_indice
                     # ] = x_e[indices][idx]
+                    img_index = data_idx[indices][idx]
+                    domain_data[domain_idx]["data_idx"][perfect_indice] = img_index
 
                     domain_data[domain_idx]["label"][perfect_indice] = y_e[indices][idx]
                     domain_data[domain_idx]["idx"][perfect_indice] = idx_e[indices][idx]
@@ -228,7 +248,7 @@ def get_matched_pairs(
                 # Changed to indexes
                 # base_feat_data = domain_data[base_domain_idx]["data"][indices_base]
 
-                base_feat_data = domain_data[base_domain_idx]["idx"][indices_base]
+                base_feat_data = domain_data[base_domain_idx]["data_idx"][indices_base]
                 base_feat_data_split = torch.split(
                     base_feat_data, args.batch_size, dim=0
                 )
@@ -250,7 +270,7 @@ def get_matched_pairs(
                 # Changed to indexes
                 # feat_x_data = domain_data[domain_idx]["data"][indices_curr]
 
-                feat_x_data = domain_data[domain_idx]["idx"][indices_curr]
+                feat_x_data = domain_data[domain_idx]["data_idx"][indices_curr]
                 feat_x_data_split = torch.split(feat_x_data, args.batch_size, dim=0)
                 feat_x = []
 

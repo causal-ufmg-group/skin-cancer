@@ -3,7 +3,7 @@ from typing import Callable, Optional
 
 import numpy as np
 import pandas as pd
-from torch import Tensor
+from torch import Tensor, int32
 from torch.utils.data import Dataset
 from torchvision.io import read_image
 
@@ -164,7 +164,12 @@ class TrainDataset(Dataset):
 
         img_label = self.img_one_hot_labels.loc[idx].to_numpy()
         img_domain = self.img_one_hot_domain.loc[idx].to_numpy()
+
         domain_index = self.domain_index.loc[idx]
+        # index is both the dataset index and domain index
+        # normal index is necessary to avoid loading all images into memory at once
+        index = Tensor([idx, domain_index]).to(int32)
+
         # TODO: Object is the same as the label because we are trying
         #       to identify is its melanoma type, i.e., its class
         img_object = np.argmax(img_label)
@@ -172,4 +177,4 @@ class TrainDataset(Dataset):
         if self.transform:
             image: Tensor = self.transform(image)
 
-        return image, img_label, img_domain, domain_index, img_object
+        return image, img_label, img_domain, index, img_object
