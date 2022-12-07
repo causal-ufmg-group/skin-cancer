@@ -43,12 +43,22 @@ def set_configuration_parameters(args: ArgsMock, key_values: dict[str, Any]) -> 
         setattr(args, key, value)
 
 
-# No domain configuration
+# OUT CONFIGURATIONS
 NO_DOMAIN_CONFIG = {"method_name": "no_domain"}
 
-# Configurations based off of:
+# ROBUSTDG CONFIGURATIONS:
 #   robustdg/notebooks/reproduce_results.ipynb
 #   robustdg/reproduce_scripts/mnist_run.py
+
+# ERM
+
+# RandMatch
+#   python train.py <...>
+#       --img_c 3 --method_name erm_match --penalty_ws 10.0 --match_case 0 --epochs 25
+
+# PerfMatch
+#   python train.py <...>
+#       --img_c 3 --method_name erm_match --penalty_ws 10.0 --match_case 1 --epochs 25
 BASELINE_ERM_CONFIG = {
     "method_name": "erm_match",
     "penalty_ws": 0,
@@ -62,6 +72,19 @@ PERFECT_MATCH_CONFIG = {
     "match_case": 1,
     "epochs": 25,
 }
+
+# DOMAIN GENERALIZATION VIA CAUSAL MATCHING
+
+# Match Function
+#   python train.py <...>
+#       --method_name matchdg_ctr --match_case 0.0
+#       --match_flag 1 --epochs 50 --batch_size 64 --pos_metric cos
+#       --match_func_aug_case 1
+# Classifier regularized on the Match Function
+#   python train.py <...>
+#       --method_name matchdg_erm --penalty_ws 0.1
+#       --match_case -1 --ctr_match_case 0.0 --ctr_match_flag 1
+#       --ctr_match_interrupt 5 --ctr_model_name resnet18 --epochs 25
 
 MATCH_DG_CTR_CONFIG = {
     "method_name": "matchdg_ctr",
