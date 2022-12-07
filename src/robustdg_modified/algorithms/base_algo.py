@@ -215,7 +215,7 @@ class BaseAlgo:
                     # indexing at [0], since this function will add a new axis
                     load_images_from_indexes(
                         self.train_dataset.dataset,
-                        [self.domain_data[d_i]["data_idx"][key]],
+                        self.domain_data[d_i]["data_idx"][key],
                     )[0]
                 )
                 label_temp.append(self.domain_data[d_i]["label"][key])

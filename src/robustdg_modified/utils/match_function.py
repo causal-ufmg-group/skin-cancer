@@ -77,7 +77,7 @@ def load_images_from_indexes(
             Shape will be: [len(indexes), num_channels, img_height, img_width]
     """
 
-    return torch.stack([dataset[int(i)][0] for i in indexes[3]])
+    return torch.stack([dataset[int(i)][0] for i in indexes])
 
 
 def get_matched_pairs(
