@@ -1,6 +1,7 @@
 from pathlib import Path
 from typing import Callable, Optional
 
+import numpy as np
 import pandas as pd
 from torch import Tensor
 from torch.utils.data import Dataset
@@ -132,10 +133,11 @@ class TestDataset(Dataset):
         image = read_image(str(img_path)).float()
 
         img_label = self.img_one_hot_labels.loc[idx].to_numpy()
+        img_object = np.argmax(img_label)
 
         if self.transform:
             image: Tensor = self.transform(image)
 
         # TODO: Need to verify whether or not idx must be in
         #       [0, number_in_domain] for each domain
-        return image, img_label, None, idx, img_label
+        return image, img_label, None, idx, img_object

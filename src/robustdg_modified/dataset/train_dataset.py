@@ -1,12 +1,15 @@
 from pathlib import Path
 from typing import Callable, Optional
 
+import numpy as np
 import pandas as pd
 from torch import Tensor
 from torch.utils.data import Dataset
 from torchvision.io import read_image
 
 from robustdg_modified.config.args_mock import ArgsMock
+
+from .utils.domain_index import get_domain_index
 
 
 class TrainDataset(Dataset):
@@ -147,6 +150,9 @@ class TrainDataset(Dataset):
         self.img_one_hot_domain = domain_df
         self.transform = transform
 
+        # Create domain specific index
+        self.domain_index = get_domain_index(domain_df)
+
     def __len__(self) -> int:
         return len(self.int_to_img_names)
 
@@ -158,13 +164,12 @@ class TrainDataset(Dataset):
 
         img_label = self.img_one_hot_labels.loc[idx].to_numpy()
         img_domain = self.img_one_hot_domain.loc[idx].to_numpy()
+        domain_index = self.domain_index.loc[idx]
         # TODO: Object is the same as the label because we are trying
         #       to identify is its melanoma type, i.e., its class
-        img_object = img_label
+        img_object = np.argmax(img_label)
 
         if self.transform:
             image: Tensor = self.transform(image)
 
-        # TODO: Need to verify whether or not idx must be in
-        #       [0, number_in_domain] for each domain
-        return image, img_label, img_domain, idx, img_object
+        return image, img_label, img_domain, domain_index, img_object
