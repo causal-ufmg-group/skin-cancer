@@ -1,3 +1,4 @@
+import os
 import random
 
 import numpy as np
@@ -22,3 +23,17 @@ def seed_everything(seed: int, data_loader_generator: torch.Generator) -> None:
     torch.use_deterministic_algorithms(True)
 
     data_loader_generator.manual_seed(seed)
+
+
+def set_env_variable_for_deterministic_algorithm():
+
+    """
+    - Operation uses CuBLAS and CUDA >= 10.2
+    - To enable deterministic behavior, you must set an environment variable
+      before running your PyTorch application:
+        CUBLAS_WORKSPACE_CONFIG=:4096:8 or CUBLAS_WORKSPACE_CONFIG=:16:8.
+
+    For more information, go to
+        https://docs.nvidia.com/cuda/cublas/index.html#cublasApi_reproducibility
+    """
+    os.environ["CUBLAS_WORKSPACE_CONFIG"] = ":4096:8"
