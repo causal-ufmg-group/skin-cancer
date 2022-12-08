@@ -114,9 +114,9 @@ class MatchEval:
         stage = self.args.match_func_data_case
 
         data_loader = STAGE_TO_DATALOADER[stage]
-        total_domains = data_loader.dataset.total_domains
+        total_domains = len(data_loader.dataset.list_domains)
         base_domain_size = data_loader.dataset.base_domain_size
-        domain_size_list = data_loader.dataset.domain_size_list
+        domain_size_list = data_loader.dataset.training_list_size
 
         inferred_match = 1
 
