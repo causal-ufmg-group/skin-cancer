@@ -128,6 +128,8 @@ class NoDomain(BaseAlgo):
 
         for epoch in range(self.args.epochs):
 
+            print(f"Started epoch: {epoch}")
+
             self.phi.train(True)
             last_loss, epoch_accuracy = self._train_one_epoch(epoch)
 
