@@ -5,8 +5,8 @@ import torch
 from torch import nn
 from torch.utils.data import DataLoader
 
-from robustdg.utils.match_function import get_matched_pairs
 from robustdg_modified.config.args_mock import ArgsMock
+from robustdg_modified.utils.match_function import get_matched_pairs
 
 
 class MatchEval:
