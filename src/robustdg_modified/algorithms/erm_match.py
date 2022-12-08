@@ -1,3 +1,4 @@
+import logging
 from pathlib import Path
 
 import torch
@@ -146,7 +147,7 @@ class ErmMatch(BaseAlgo):
 
                     data_match = data_match_tensor.to(self.cuda)
                     feat_match = self.phi(data_match)
-                    #                     print(feat_match.shape)
+                    #                     logging.info(feat_match.shape)
 
                     # Filter valid labels
                     valid_labels = label_match_tensor >= 0
@@ -233,11 +234,11 @@ class ErmMatch(BaseAlgo):
                 del loss_e
                 torch.cuda.empty_cache()
 
-            #             print('Gradient Norm: ', total_grad_norm)
+            #             logging.info('Gradient Norm: ', total_grad_norm)
 
-            print("Train Loss Basic : ", penalty_erm, penalty_ws)
-            print("Train Acc Env : ", 100 * train_acc / train_size)
-            print("Done Training for epoch: ", epoch)
+            logging.info(f"Train Loss Basic : {penalty_erm, penalty_ws}")
+            logging.info(f"Train Acc Env :  {100 * train_acc / train_size}")
+            logging.info(f"Done Training for epoch:  {epoch}")
 
             # Train Dataset Accuracy
             self.train_acc.append(100 * train_acc / train_size)
@@ -254,9 +255,7 @@ class ErmMatch(BaseAlgo):
                 self.max_epoch = epoch
                 self.save_model()
 
-            print(
-                "Current Best Epoch: ",
-                self.max_epoch,
-                " with Test Accuracy: ",
-                self.final_acc[self.max_epoch],
+            logging.info(
+                f"Current Best Epoch: {self.max_epoch}"
+                f" with Test Accuracy: {self.final_acc[self.max_epoch]}"
             )

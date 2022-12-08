@@ -1,3 +1,4 @@
+import logging
 import os
 import sys
 from pathlib import Path
@@ -231,7 +232,7 @@ class MatchDG(BaseAlgo):
             for batch_idx, (x_e, y_e, d_e, idx_e, obj_e) in enumerate(
                 self.train_dataset
             ):
-                #         print('Batch Idx: ', batch_idx)
+                #         logging.info('Batch Idx: ', batch_idx)
 
                 self.opt.zero_grad()
                 loss_e = torch.tensor(0.0).to(self.cuda)
@@ -278,7 +279,11 @@ class MatchDG(BaseAlgo):
                         # neg_feat_match = feat_match[neg_indices]
 
                         # If no instances of label y_c in the current batch, continue
-                        print(pos_indices.shape[0], neg_indices.shape[0], y_c)
+                        logging.debug(f"Label: {y_c}")
+                        logging.debug(
+                            f"Num positive matches: {pos_indices.shape[0]},"
+                            f"Num negative matches: {neg_indices.shape[0]}"
+                        )
 
                         if pos_indices.shape[0] == 0 or neg_indices.shape[0] == 0:
                             continue
@@ -297,7 +302,7 @@ class MatchDG(BaseAlgo):
                             neg_feat_i = feat_match[domain_neg_indices_i].to(self.cuda)
 
                             if torch.sum(torch.isnan(neg_feat_i)):
-                                print("Non Reshaped X2 is Nan")
+                                logging.error("Non Reshaped X2 is Nan")
                                 sys.exit()
 
                             # If I understood this function correctly, it will
@@ -315,7 +320,7 @@ class MatchDG(BaseAlgo):
                             del neg_feat_i
 
                             if torch.sum(torch.isnan(neg_dist)):
-                                print("Neg Dist Nan")
+                                logging.error("Neg Dist Nan")
                                 sys.exit()
 
                             # Iterating pos dist for current anchor
@@ -356,13 +361,13 @@ class MatchDG(BaseAlgo):
                                     exp_pos = torch.exp(pos_dist_inputted)
 
                                     if torch.sum(torch.isnan(neg_dist)):
-                                        print("Pos Dist Nan")
+                                        logging.error("Pos Dist Nan")
                                         sys.exit()
 
                                     if torch.sum(
                                         torch.isnan(torch.log(exp_pos + neg_dist))
                                     ):
-                                        print("Xent Nan")
+                                        logging.error("Xent Nan")
                                         sys.exit()
 
                                     diff_hinge_loss += -1 * torch.sum(
@@ -400,14 +405,14 @@ class MatchDG(BaseAlgo):
                 del diff_hinge_loss
                 torch.cuda.empty_cache()
 
-            print(
-                "Train Loss Ctr : ",
-                penalty_same_ctr,
-                penalty_diff_ctr,
-                penalty_same_hinge,
-                penalty_diff_hinge,
+            logging.info(
+                f"Train Loss Ctr : "
+                f"{penalty_same_ctr},"
+                f"{penalty_diff_ctr},"
+                f"{penalty_same_hinge},"
+                f"{penalty_diff_hinge}"
             )
-            print("Done Training for epoch: ", epoch)
+            logging.info(f"Done Training for epoch:  {epoch}")
 
             if (epoch + 1) % 5 == 0:
 
@@ -436,11 +441,9 @@ class MatchDG(BaseAlgo):
                     self.max_epoch = epoch
                     self.save_model_ctr_phase(epoch)
 
-                print(
-                    "Current Best Epoch: ",
-                    self.max_epoch,
-                    " with TopK Overlap: ",
-                    self.max_val_score,
+                logging.info(
+                    f"Current Best Epoch: {self.max_epoch}"
+                    f" with TopK Overlap: {self.max_val_score}"
                 )
 
     def train_erm_phase(self):
@@ -475,7 +478,7 @@ class MatchDG(BaseAlgo):
                 for batch_idx, (x_e, y_e, d_e, idx_e, obj_e) in enumerate(
                     self.train_dataset
                 ):
-                    #         print('Batch Idx: ', batch_idx)
+                    #         logging.info('Batch Idx: ', batch_idx)
 
                     self.opt.zero_grad()
                     loss_e = torch.tensor(0.0).to(self.cuda)
@@ -507,7 +510,7 @@ class MatchDG(BaseAlgo):
 
                         data_match = data_match_tensor.to(self.cuda)
                         feat_match = self.phi(data_match)
-                        #                     print(feat_match.shape)
+                        #                     logging.info(feat_match.shape)
 
                         # Filter valid labels
                         valid_labels = label_match_tensor >= 0
@@ -578,9 +581,14 @@ class MatchDG(BaseAlgo):
                     del loss_e
                     torch.cuda.empty_cache()
 
-                print("Train Loss Basic : ", penalty_erm_extra, penalty_erm, penalty_ws)
-                print("Train Acc Env : ", 100 * train_acc / train_size)
-                print("Done Training for epoch: ", epoch)
+                logging.info(
+                    f"Train Loss Basic : "
+                    f"{penalty_erm_extra},"
+                    f"{penalty_erm},"
+                    f"{penalty_ws}"
+                )
+                logging.info(f"Train Acc Env :  {100 * train_acc / train_size}")
+                logging.info(f"Done Training for epoch:  {epoch}")
 
                 # Train Dataset Accuracy
                 self.train_acc.append(100 * train_acc / train_size)
@@ -597,9 +605,7 @@ class MatchDG(BaseAlgo):
                     self.max_epoch = epoch
                     self.save_model_erm_phase(run_erm)
 
-                print(
-                    "Current Best Epoch: ",
-                    self.max_epoch,
-                    " with Test Accuracy: ",
-                    self.final_acc[self.max_epoch],
+                logging.info(
+                    f"Current Best Epoch: {self.max_epoch}"
+                    f" with Test Accuracy: {self.final_acc[self.max_epoch]}"
                 )

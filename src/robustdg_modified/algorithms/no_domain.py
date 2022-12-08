@@ -1,3 +1,4 @@
+import logging
 from pathlib import Path
 
 import torch
@@ -128,16 +129,16 @@ class NoDomain(BaseAlgo):
 
         for epoch in range(self.args.epochs):
 
-            print(f"Started epoch: {epoch}")
+            logging.info(f"Started epoch: {epoch}")
 
             self.phi.train(True)
             last_loss, epoch_accuracy = self._train_one_epoch(epoch)
 
             self.phi.train(False)
 
-            print(f"Epoch Final Train Loss: {last_loss}")
-            print(f"Epoch Train Acc: {100 * epoch_accuracy}")
-            print(f"Done Training for epoch: {epoch}")
+            logging.info(f"Epoch Final Train Loss: {last_loss}")
+            logging.info(f"Epoch Train Acc: {100 * epoch_accuracy}")
+            logging.info(f"Done Training for epoch: {epoch}")
 
             # Train Dataset Accuracy
             self.train_acc.append(100 * epoch_accuracy)
@@ -154,7 +155,7 @@ class NoDomain(BaseAlgo):
                 self.max_epoch = epoch
                 self.save_model()
 
-            print(
-                f"Current Best Epoch: {self.max_epoch} "
-                f"with Test Accuracy: {self.final_acc[self.max_epoch]}"
+            logging.info(
+                f"Current Best Epoch: {self.max_epoch}"
+                f" with Test Accuracy: {self.final_acc[self.max_epoch]}"
             )

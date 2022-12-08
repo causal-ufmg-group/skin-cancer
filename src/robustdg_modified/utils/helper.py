@@ -1,3 +1,4 @@
+import logging
 import sys
 
 import torch
@@ -24,7 +25,7 @@ def l1_dist(x1: torch.Tensor, x2: torch.Tensor) -> torch.Tensor:
     elif len(x1.shape) == 1 and len(x2.shape) == 1:
         return torch.sum(torch.abs(x1 - x2), dim=0)
     else:
-        print("Error: Expect 1, 2 or 3 rank torch.tensors to compute L1 Norm")
+        logging.error("Error: Expect 1, 2 or 3 rank torch.tensors to compute L1 Norm")
         return
 
 
@@ -44,7 +45,7 @@ def l2_dist(x1: torch.Tensor, x2: torch.Tensor) -> torch.Tensor:
     elif len(x1.shape) == 1 and len(x2.shape) == 1:
         return torch.sum((x1 - x2) ** 2, dim=0)
     else:
-        print("Error: Expect 1, 2 or 3 rank torch.tensors to compute L2 Norm")
+        logging.error("Error: Expect 1, 2 or 3 rank torch.tensors to compute L2 Norm")
         return
 
 
@@ -62,7 +63,7 @@ def embedding_dist(
 
         # Only implemnted if x1, x2 are 2 rank torch.tensors
         if len(x1.shape) != 2 or len(x2.shape) != 2:
-            print(
+            logging.error(
                 "Error: both should be rank 2 tensors for NT-Xent loss computation"
             )
 
@@ -71,11 +72,11 @@ def embedding_dist(
         #   which needs to be shaped to (N,1) to ensure row wise l2 normalization
         #   takes place
         if torch.sum(torch.isnan(x1)):
-            print("X1 is nan")
+            logging.error("X1 is nan")
             sys.exit()
 
         if torch.sum(torch.isnan(x2)):
-            print("X1 is nan")
+            logging.error("X1 is nan")
             sys.exit()
 
         eps = 1e-8
@@ -87,7 +88,7 @@ def embedding_dist(
         x1 = x1 / torch.max(norm, temp)
 
         if torch.sum(torch.isnan(x1)):
-            print("X1 Norm is nan")
+            logging.error("X1 Norm is nan")
             sys.exit()
 
         norm = x2.norm(dim=1)
@@ -97,8 +98,8 @@ def embedding_dist(
         x2 = x2 / torch.max(norm, temp)
 
         if torch.sum(torch.isnan(x2)):
-            print("Norm: ", norm, x2)
-            print("X2 Norm is nan")
+            logging.error("Norm: ", norm, x2)
+            logging.error("X2 Norm is nan")
             sys.exit()
 
         # Boradcasting the anchors vector to compute loss over all negative matches
@@ -107,13 +108,13 @@ def embedding_dist(
         cos_sim = cos_sim / tau
 
         if torch.sum(torch.isnan(cos_sim)):
-            print("Cos is nan")
+            logging.error("Cos is nan")
             sys.exit()
 
         loss = torch.sum(torch.exp(cos_sim), dim=1)
 
         if torch.sum(torch.isnan(loss)):
-            print("Loss is nan")
+            logging.error("Loss is nan")
             sys.exit()
 
         return loss

@@ -1,3 +1,4 @@
+import logging
 from pathlib import Path
 
 import numpy as np
@@ -151,8 +152,10 @@ class MatchEval:
         )
         self.metric_score["Perfect Match Rank"] = np.mean(perfect_match_rank)
 
-        print("Perfect Match Score: ", self.metric_score["Perfect Match Score"])
-        print(
+        logging.info(
+            f"Perfect Match Score:  {self.metric_score['Perfect Match Score']}"
+        )
+        logging.info(
             "TopK Perfect Match Score: ", self.metric_score["TopK Perfect Match Score"]
         )
-        print("Perfect Match Rank: ", self.metric_score["Perfect Match Rank"])
+        logging.info(f"Perfect Match Rank:  {self.metric_score['Perfect Match Rank']}")

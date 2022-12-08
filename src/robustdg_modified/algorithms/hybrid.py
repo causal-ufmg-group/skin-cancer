@@ -1,3 +1,4 @@
+import logging
 import os
 from pathlib import Path
 
@@ -205,7 +206,7 @@ class Hybrid(BaseAlgo):
                 for batch_idx, (x_e, x_org_e, y_e, d_e, idx_e, obj_e) in enumerate(
                     self.train_dataset
                 ):
-                    #         print('Batch Idx: ', batch_idx)
+                    #         logging.info('Batch Idx: ', batch_idx)
 
                     self.opt.zero_grad()
                     loss_e = torch.tensor(0.0).to(self.cuda)
@@ -258,7 +259,7 @@ class Hybrid(BaseAlgo):
 
                         data_match = data_match_tensor.to(self.cuda)
                         feat_match = self.phi(data_match)
-                        #                     print(feat_match.shape)
+                        #                     logging.info(feat_match.shape)
 
                         # Filter valid labels
                         valid_labels = label_match_tensor >= 0
@@ -330,15 +331,15 @@ class Hybrid(BaseAlgo):
                     del loss_e
                     torch.cuda.empty_cache()
 
-                print(
-                    "Train Loss Basic : ",
-                    penalty_erm_extra,
-                    penalty_aug,
-                    penalty_erm,
-                    penalty_ws,
+                logging.info(
+                    f"Train Loss Basic : "
+                    f"{penalty_erm_extra},"
+                    f"{penalty_aug},"
+                    f"{penalty_erm},"
+                    f"{penalty_ws}"
                 )
-                print("Train Acc Env : ", 100 * train_acc / train_size)
-                print("Done Training for epoch: ", epoch)
+                logging.info(f"Train Acc Env :  {100 * train_acc / train_size}")
+                logging.info(f"Done Training for epoch:  {epoch}")
 
                 # Val Dataset Accuracy
                 self.val_acc.append(self.get_test_accuracy("val"))
@@ -352,9 +353,7 @@ class Hybrid(BaseAlgo):
                     self.max_epoch = epoch
                     self.save_model_erm_phase(run_erm)
 
-                print(
-                    "Current Best Epoch: ",
-                    self.max_epoch,
-                    " with Test Accuracy: ",
-                    self.final_acc[self.max_epoch],
+                logging.info(
+                    f"Current Best Epoch: {self.max_epoch}"
+                    f" with Test Accuracy: {self.final_acc[self.max_epoch]}"
                 )

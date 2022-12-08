@@ -31,3 +31,6 @@ IMG_DIR = {
 }
 
 LOG_DIR = CWD.parent / "logs/"
+CHECKPOINT_LOG_DIR = LOG_DIR / "checkpoints/"
+
+CHECKPOINT_LOG_DIR.mkdir(parents=True, exist_ok=True)

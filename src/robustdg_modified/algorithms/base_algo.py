@@ -1,3 +1,4 @@
+import logging
 import random
 from pathlib import Path
 from typing import Literal
@@ -279,6 +280,6 @@ class BaseAlgo:
 
         self.phi.train(True)
 
-        print(" Accuracy: ", case, 100 * test_acc / test_size)
+        logging.info(f"Accuracy: {case, 100 * test_acc / test_size}")
 
         return 100 * test_acc / test_size

@@ -14,7 +14,7 @@ Changes:
     Created helper function to load images from indexes.
         function: load_images_from_indexes
 """
-
+import logging
 from typing import Iterable
 
 import numpy as np
@@ -93,9 +93,9 @@ def get_matched_pairs(
     inferred_match: int,
 ):
     """ """
-    print("Total Domains", total_domains)
-    print("Domain Size", domain_size)
-    print("Training List Size", training_list_size)
+    logging.info(f"Total Domains {total_domains}")
+    logging.info(f"Domain Size {domain_size}")
+    logging.info(f"Training List Size {training_list_size}")
 
     # TODOs: Move the domain_data dictionary to data_loader class (saves time by
     # not computing it again and again)
@@ -186,7 +186,9 @@ def get_matched_pairs(
     # Sanity Check: To check if the domain_data was updated for all the data points
     for domain in range(total_domains):
         if domain_count[domain] != training_list_size[domain]:
-            print("Issue: Some data points are missing from domain_data dictionary")
+            logging.warning(
+                "Issue: Some data points are missing from domain_data dictionary"
+            )
 
     # Creating the random permutation tensor for each domain
     # TODO: Perm Prob might become 2.0 in case of matchdg_erm, handle that case
@@ -194,7 +196,7 @@ def get_matched_pairs(
         perm_prob = 1.0
     else:
         perm_prob = 1.0 - match_case
-    print("Perm prob: ", perm_prob)
+    logging.info(f"Perm prob:  {perm_prob}")
     total_matches_per_point = args.total_matches_per_point
 
     # Determine the base_domain_idx as the one with the max samples of current class
@@ -210,7 +212,7 @@ def get_matched_pairs(
                 base_domain_idx = domain_idx
 
         base_domain_dict[y_c] = base_domain_idx
-        print("Base Domain: ", base_domain_size, base_domain_idx, y_c)
+        logging.info(f"Base Domain:  {base_domain_size, base_domain_idx, y_c}")
 
     # Finding the match
     for domain_idx in range(total_domains):
@@ -220,7 +222,7 @@ def get_matched_pairs(
 
         for y_c in range(args.out_classes):
 
-            #             print(domain_idx, y_c)
+            #             logging.info(domain_idx, y_c)
             if base_domain_dict[y_c] < 0:
                 continue
 
@@ -231,7 +233,7 @@ def get_matched_pairs(
             obj_base = domain_data[base_domain_idx]["obj"][indices_base]
 
             if domain_idx == base_domain_idx:
-                #                 print('base domain idx')
+                #                 logging.info('base domain idx')
                 # Then its simple, the index if same as ordered-base-indice
                 for idx in range(ordered_base_indices.shape[0]):
                     perfect_indice = ordered_base_indices[idx].item()
@@ -335,7 +337,7 @@ def get_matched_pairs(
                                 .nonzero()[0, 0]
                                 .item()
                             )
-            #                 print('Time Taken in CTR Loop: ', time.time()-start_time)
+            #       logging.info('Time Taken in CTR Loop: ', time.time()-start_time)
 
             elif inferred_match == 0 and perfect_match == 1:
 
@@ -388,10 +390,10 @@ def get_matched_pairs(
                         )
                     total_data_idx += 1
 
-        print("Perfect Match Mistakes: ", perf_match_mistakes)
+        logging.info(f"Perfect Match Mistakes:  {perf_match_mistakes}")
 
         if total_data_idx != domain_size:
-            print(
+            logging.warning(
                 "Issue: Some data points left from data_matched dictionary",
                 total_data_idx,
                 domain_size,
@@ -400,10 +402,10 @@ def get_matched_pairs(
     # Sanity Check:  N keys; K vals per key
     for idx in range(len(data_matched)):
         if len(data_matched[idx]) != total_domains:
-            print("Issue with data matching")
+            logging.warning("Issue with data matching")
 
     if inferred_match:
-        print(np.mean(np.array(perfect_match_rank)))
+        logging.info(f"Perfect Match rank: {np.mean(np.array(perfect_match_rank))}")
 
-    print(len(data_matched))
+    logging.info(f"Data matches lenght: {len(data_matched)}")
     return data_matched, domain_data, perfect_match_rank
