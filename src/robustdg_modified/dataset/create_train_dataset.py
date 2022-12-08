@@ -72,7 +72,7 @@ def create_robustdg_train_dataset(
     domain_df: pd.DataFrame,
     labels_df: pd.DataFrame,
     transform: Optional[Callable] = None,
-) -> None:
+) -> TrainDataset:
 
     """
     Creates an instance of TrainDataset class.
