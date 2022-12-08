@@ -1,5 +1,5 @@
 from pathlib import Path
-from typing import Callable, Optional
+from typing import Callable, Literal, Optional
 
 import numpy as np
 import pandas as pd
@@ -126,7 +126,7 @@ class TestDataset(Dataset):
     def __len__(self) -> int:
         return len(self.int_to_img_names)
 
-    def __getitem__(self, idx: int) -> tuple[Tensor, Tensor, None, int, Tensor]:
+    def __getitem__(self, idx: int) -> tuple[Tensor, Tensor, Literal[-1], int, Tensor]:
 
         img_filename = self.int_to_img_names.loc[idx]
         img_path = self.img_dir / f"{img_filename}.jpg"
@@ -140,4 +140,4 @@ class TestDataset(Dataset):
 
         # TODO: Need to verify whether or not idx must be in
         #       [0, number_in_domain] for each domain
-        return image, img_label, None, idx, img_object
+        return image, img_label, -1, idx, img_object
