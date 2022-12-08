@@ -221,6 +221,8 @@ def get_matched_pairs(
         for y_c in range(args.out_classes):
 
             #             print(domain_idx, y_c)
+            if base_domain_dict[y_c] < 0:
+                continue
 
             base_domain_idx = base_domain_dict[y_c]
             indices_base = domain_data[base_domain_idx]["label"] == y_c
@@ -256,6 +258,10 @@ def get_matched_pairs(
 
                 # Changed to only load images when needed
                 for batch_feat in base_feat_data_split:
+
+                    if batch_feat.numel() == 0:
+                        continue
+
                     with torch.no_grad():
                         imgs_feat = load_images_from_indexes(
                             train_dataset.dataset, batch_feat
@@ -276,6 +282,10 @@ def get_matched_pairs(
 
                 # Changed to only load images when needed
                 for batch_feat in feat_x_data_split:
+
+                    if batch_feat.numel() == 0:
+                        continue
+
                     with torch.no_grad():
                         imgs_feat = load_images_from_indexes(
                             train_dataset.dataset, batch_feat
@@ -285,17 +295,25 @@ def get_matched_pairs(
 
                     del imgs_feat
 
-                feat_x = torch.cat(feat_x)
+                # Changed to accept empty feat_x
+                feat_x = torch.cat(feat_x) if len(feat_x) else None
+                size_base = ordered_base_indices.shape[0]
 
-                for idx in range(ordered_base_indices.shape[0]):
-                    ws_dist = torch.sum((feat_x - base_feat[idx]) ** 2, dim=1)
-                    sort_val, sort_idx = torch.sort(ws_dist, dim=0)
-                    del ws_dist
+                for idx in range(size_base):
+
+                    sort_idx = list(range(feat_x_data.shape[0]))
+                    np.random.shuffle(sort_idx)
+
+                    if feat_x is not None:
+                        ws_dist = torch.sum((feat_x - base_feat[idx]) ** 2, dim=1)
+                        sort_val, sort_idx = torch.sort(ws_dist, dim=0)
+                        del ws_dist
 
                     perfect_indice = ordered_base_indices[idx].item()
                     curr_indices = ordered_curr_indices[
                         sort_idx[:total_matches_per_point]
                     ]
+
                     for _, curr_indice in enumerate(curr_indices):
                         data_matched[total_data_idx][domain_idx].append(
                             curr_indice.item()

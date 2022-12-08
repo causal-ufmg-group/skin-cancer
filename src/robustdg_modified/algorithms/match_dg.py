@@ -9,9 +9,14 @@ from torch.nn import functional as F
 from torch.utils.data import DataLoader
 
 from robustdg_modified.config.args_mock import ArgsMock
+from robustdg_modified.evaluation.match_eval import MatchEval
 from robustdg_modified.utils.helper import cosine_similarity, embedding_dist
 
 from .base_algo import BaseAlgo, TrainValTest
+from .utils.valid_index import (
+    get_desired_entries_for_column,
+    get_desired_entries_in_both_columns,
+)
 
 
 class MatchDG(BaseAlgo):
@@ -177,8 +182,10 @@ class MatchDG(BaseAlgo):
         )
 
         save_path = base_res_dir + "/Model_" + self.ctr_load_post_string + ".pth"
-        self.ctr_phi.load_state_dict(torch.load(save_path))
-        self.ctr_phi.eval()
+
+        if Path(save_path).exists():
+            self.ctr_phi.load_state_dict(torch.load(save_path))
+            self.ctr_phi.eval()
 
         # Inferred Match Case
         if self.args.match_case == -1:
@@ -194,6 +201,11 @@ class MatchDG(BaseAlgo):
         return data_matched, domain_data
 
     def train_ctr_phase(self):
+
+        """
+        Changed to allow invalid images, that is, to allow that some
+        entries from self.get_match_function_batch() do not exist.
+        """
 
         self.max_epoch = -1
         self.max_val_score = 0.0
@@ -248,89 +260,116 @@ class MatchDG(BaseAlgo):
                     ) = self.get_match_function_batch(batch_idx)
 
                     data_match = data_match_tensor.to(self.cuda)
-                    data_match = data_match.flatten(start_dim=0, end_dim=1)
                     feat_match = self.phi(data_match)
 
-                    label_match = label_match_tensor.to(self.cuda)
-                    label_match = torch.squeeze(
-                        label_match.flatten(start_dim=0, end_dim=1)
-                    )
-
-                    # Creating tensor of shape ( domain size, total domains, feat size )
-                    feat_match = torch.stack(
-                        torch.split(feat_match, len(self.train_domains))
-                    )
-                    label_match = torch.stack(
-                        torch.split(label_match, len(self.train_domains))
-                    )
+                    # Filter valid labels
+                    valid_labels = label_match_tensor >= 0
 
                     # Contrastive Loss
                     same_neg_counter = 1
                     diff_neg_counter = 1
                     for y_c in range(self.args.out_classes):
 
-                        pos_indices = label_match[:, 0] == y_c
-                        neg_indices = label_match[:, 0] != y_c
-                        pos_feat_match = feat_match[pos_indices]
-                        neg_feat_match = feat_match[neg_indices]
+                        pos_indices = label_match_tensor == y_c
+                        neg_indices = label_match_tensor != y_c
+                        # pos_indices = label_match[:, 0] == y_c
+                        # neg_indices = label_match[:, 0] != y_c
+                        # pos_feat_match = feat_match[pos_indices]
+                        # neg_feat_match = feat_match[neg_indices]
 
                         # If no instances of label y_c in the current batch, continue
-                        print(pos_feat_match.shape[0], neg_feat_match.shape[0], y_c)
+                        print(pos_indices.shape[0], neg_indices.shape[0], y_c)
 
-                        if pos_feat_match.shape[0] == 0 or neg_feat_match.shape[0] == 0:
+                        if pos_indices.shape[0] == 0 or neg_indices.shape[0] == 0:
                             continue
 
                         # Iterating over anchors from different domains
-                        for d_i in range(pos_feat_match.shape[1]):
-                            if torch.sum(torch.isnan(neg_feat_match)):
+                        for d_i in range(pos_indices.shape[1]):
+
+                            domain_pos_indices_i = get_desired_entries_for_column(
+                                valid_labels, d_i, pos_indices[:, d_i]
+                            )
+                            domain_neg_indices_i = get_desired_entries_for_column(
+                                valid_labels, d_i, neg_indices[:, d_i]
+                            )
+
+                            pos_feat_i = feat_match[domain_pos_indices_i].to(self.cuda)
+                            neg_feat_i = feat_match[domain_neg_indices_i].to(self.cuda)
+
+                            if torch.sum(torch.isnan(neg_feat_i)):
                                 print("Non Reshaped X2 is Nan")
                                 sys.exit()
 
-                            diff_neg_feat_match = neg_feat_match.view(
-                                neg_feat_match.shape[0] * neg_feat_match.shape[1],
-                                neg_feat_match.shape[2],
-                            )
-
-                            if torch.sum(torch.isnan(diff_neg_feat_match)):
-                                print("Reshaped X2 is Nan")
-                                sys.exit()
-
+                            # If I understood this function correctly, it will
+                            # broadcast all positive matches to all negatives ones
+                            # so it should work correctly
                             neg_dist = embedding_dist(
-                                pos_feat_match[:, d_i, :],
-                                diff_neg_feat_match[:, :],
+                                pos_feat_i,
+                                neg_feat_i,
                                 self.args.pos_metric,
                                 self.args.tau,
                                 xent=True,
                             )
+
+                            del pos_feat_i
+                            del neg_feat_i
+
                             if torch.sum(torch.isnan(neg_dist)):
                                 print("Neg Dist Nan")
                                 sys.exit()
 
                             # Iterating pos dist for current anchor
-                            for d_j in range(pos_feat_match.shape[1]):
+                            for d_j in range(pos_indices.shape[1]):
+
+                                mask_i, mask_j = get_desired_entries_in_both_columns(
+                                    valid_labels, d_i, d_j
+                                )
+                                # We only only positive matches
+                                # so we should filter out negative ones
+                                valid_pos_indices = pos_indices[valid_labels]
+                                mask_i = mask_i & valid_pos_indices
+                                mask_j = mask_j & valid_pos_indices
+
+                                feat_i = feat_match[mask_i].to(self.cuda)
+                                feat_j = feat_match[mask_j].to(self.cuda)
+
                                 if d_i != d_j:
                                     pos_dist = 1.0 - embedding_dist(
-                                        pos_feat_match[:, d_i, :],
-                                        pos_feat_match[:, d_j, :],
+                                        feat_i,
+                                        # pos_feat_match[:, d_i, :],
+                                        feat_j,
+                                        # pos_feat_match[:, d_j, :],
                                         self.args.pos_metric,
                                     )
+
+                                    del feat_i
+                                    del feat_j
+
                                     pos_dist = pos_dist / self.args.tau
+                                    # TODO: Verify if setting to zero is ideal or
+                                    # if we should ignore it
+                                    pos_dist_inputted = (
+                                        pos_dist
+                                        if pos_dist.numel()
+                                        else torch.Tensor([0]).to(self.cuda)
+                                    )
+                                    exp_pos = torch.exp(pos_dist_inputted)
+
                                     if torch.sum(torch.isnan(neg_dist)):
                                         print("Pos Dist Nan")
                                         sys.exit()
 
                                     if torch.sum(
-                                        torch.isnan(
-                                            torch.log(torch.exp(pos_dist) + neg_dist)
-                                        )
+                                        torch.isnan(torch.log(exp_pos + neg_dist))
                                     ):
                                         print("Xent Nan")
                                         sys.exit()
 
                                     diff_hinge_loss += -1 * torch.sum(
-                                        pos_dist
-                                        - torch.log(torch.exp(pos_dist) + neg_dist)
+                                        pos_dist_inputted
+                                        - torch.log(exp_pos + neg_dist)
                                     )
+
                                     diff_ctr_loss += torch.sum(neg_dist)
                                     diff_neg_counter += pos_dist.shape[0]
 
@@ -372,8 +411,6 @@ class MatchDG(BaseAlgo):
 
             if (epoch + 1) % 5 == 0:
 
-                from robustdg.evaluation.match_eval import MatchEval
-
                 test_method = MatchEval(
                     self.args,
                     self.train_dataset,
@@ -391,7 +428,7 @@ class MatchDG(BaseAlgo):
                 # Save the model's weights post training
                 if (
                     test_method.metric_score["TopK Perfect Match Score"]
-                    > self.max_val_score
+                    >= self.max_val_score
                 ):
                     self.max_val_score = test_method.metric_score[
                         "TopK Perfect Match Score"
@@ -407,6 +444,11 @@ class MatchDG(BaseAlgo):
                 )
 
     def train_erm_phase(self):
+
+        """
+        Changed to allow invalid images, that is, to allow that some
+        entries from self.get_match_function_batch() do not exist.
+        """
 
         for run_erm in range(self.args.n_runs_matchdg_erm):
 
@@ -462,71 +504,59 @@ class MatchDG(BaseAlgo):
                             label_match_tensor,
                             curr_batch_size,
                         ) = self.get_match_function_batch(batch_idx)
-                        data_match = data_match_tensor.to(self.cuda)
-                        data_match = data_match.flatten(start_dim=0, end_dim=1)
-                        feat_match = self.phi(data_match)
 
-                        label_match = label_match_tensor.to(self.cuda)
-                        label_match = torch.squeeze(
-                            label_match.flatten(start_dim=0, end_dim=1)
-                        )
+                        data_match = data_match_tensor.to(self.cuda)
+                        feat_match = self.phi(data_match)
+                        #                     print(feat_match.shape)
+
+                        # Filter valid labels
+                        valid_labels = label_match_tensor >= 0
+                        label_match = label_match_tensor[valid_labels].to(self.cuda)
 
                         erm_loss += F.cross_entropy(feat_match, label_match.long()).to(
                             self.cuda
                         )
                         penalty_erm += float(erm_loss)
+                        loss_e += erm_loss
 
                         train_acc += torch.sum(
                             torch.argmax(feat_match, dim=1) == label_match
                         ).item()
                         train_size += label_match.shape[0]
 
-                        # Creating tensor of shape
-                        #   ( domain size, total domains, feat size )
-                        feat_match = torch.stack(
-                            torch.split(feat_match, len(self.train_domains))
-                        )
-                        label_match = torch.stack(
-                            torch.split(label_match, len(self.train_domains))
-                        )
+                        train_size += label_match.shape[0]
 
                         # Positive Match Loss
                         pos_match_counter = 0
-                        for d_i in range(feat_match.shape[1]):
+                        for d_i in range(valid_labels.shape[1]):
                             #                 if d_i != base_domain_idx:
                             #                     continue
-                            for d_j in range(feat_match.shape[1]):
+                            for d_j in range(valid_labels.shape[1]):
+
+                                # Use valid labels to detect which
+                                # images should be used
+                                mask_i, mask_j = get_desired_entries_in_both_columns(
+                                    valid_labels, d_i, d_j
+                                )
+
+                                feat_i = feat_match[mask_i]
+                                feat_j = feat_match[mask_j]
+
                                 if d_j > d_i:
                                     if self.args.pos_metric == "l2":
                                         wasserstein_loss += torch.sum(
-                                            torch.sum(
-                                                (
-                                                    feat_match[:, d_i, :]
-                                                    - feat_match[:, d_j, :]
-                                                )
-                                                ** 2,
-                                                dim=1,
-                                            )
+                                            (feat_i - feat_j) ** 2
                                         )
                                     elif self.args.pos_metric == "l1":
                                         wasserstein_loss += torch.sum(
-                                            torch.sum(
-                                                torch.abs(
-                                                    feat_match[:, d_i, :]
-                                                    - feat_match[:, d_j, :]
-                                                ),
-                                                dim=1,
-                                            )
+                                            torch.abs(feat_i - feat_j)
                                         )
                                     elif self.args.pos_metric == "cos":
                                         wasserstein_loss += torch.sum(
-                                            cosine_similarity(
-                                                feat_match[:, d_i, :],
-                                                feat_match[:, d_j, :],
-                                            )
+                                            cosine_similarity(feat_i, feat_j)
                                         )
 
-                                    pos_match_counter += feat_match.shape[0]
+                                    pos_match_counter += feat_i.shape[0]
 
                         wasserstein_loss = wasserstein_loss / pos_match_counter
                         penalty_ws += float(wasserstein_loss)
