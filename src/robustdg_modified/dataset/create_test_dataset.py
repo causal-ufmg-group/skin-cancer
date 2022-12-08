@@ -14,7 +14,7 @@ def create_robustdg_test_dataset(
     int_to_img_names: pd.Series,
     labels_df: pd.DataFrame,
     transform: Optional[Callable] = None,
-) -> None:
+) -> TestDataset:
 
     r"""
     Creates an instance of TestDataset class.
