@@ -136,7 +136,7 @@ class BaseAlgo:
         self.scheduler = torch.optim.lr_scheduler.StepLR(self.opt, step_size=25)
 
         # Others parameters
-        self.base_res_dir = base_res_dir
+        self.base_res_dir = str(base_res_dir)
         self.run = run
         self.cuda = cuda
 
