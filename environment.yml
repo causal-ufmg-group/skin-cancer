@@ -18,7 +18,6 @@ dependencies:
     - flake8
     - jupyter
     - pip
-    - opacus
     - pip:
         - more-itertools
         - grad-cam

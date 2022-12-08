@@ -229,11 +229,6 @@ class BaseAlgo:
         return data_match_tensor, label_match_tensor, curr_batch_size
 
     def get_test_accuracy(self, case):
-        import opacus
-
-        if self.args.dp_noise:
-            opacus.autograd_grad_sample.disable_hooks()
-            # self.privacy_engine.module.disable_hooks()
 
         # Test Env Code
         test_acc = 0.0
@@ -242,6 +237,8 @@ class BaseAlgo:
             dataset = self.val_dataset
         elif case == "test":
             dataset = self.test_dataset
+
+        self.phi.train(False)
 
         for batch_idx, (x_e, y_e, d_e, idx_e, obj_e) in enumerate(dataset):
             with torch.no_grad():
@@ -256,12 +253,8 @@ class BaseAlgo:
                 test_acc += torch.sum(torch.argmax(out, dim=1) == y_e).item()
                 test_size += y_e.shape[0]
 
-                # To avoid CUDA memory issues
-                if self.args.dp_noise:
-                    self.opt.zero_grad()
+        self.phi.train(True)
 
         print(" Accuracy: ", case, 100 * test_acc / test_size)
 
-        # self.privacy_engine.module.enable_hooks()
-        opacus.autograd_grad_sample.enable_hooks()
         return 100 * test_acc / test_size
