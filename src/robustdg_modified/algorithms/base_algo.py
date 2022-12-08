@@ -169,6 +169,8 @@ class BaseAlgo:
 
     def get_match_function(self, inferred_match, phi):
 
+        # Each line in data_matches belong to the same class and object
+        # While each column is the same domain
         data_matched, domain_data, _ = get_matched_pairs(
             self.args,
             self.cuda,
@@ -190,11 +192,30 @@ class BaseAlgo:
 
     def get_match_function_batch(self, batch_idx):
 
+        """
+        Changes:
+            1) Labels are returned in a table state.
+
+                Each column has the same domain.
+                Each row has the same label and object.
+
+                When there isn't an example in the same label/object and domain,
+                its entry will contain the sentinel value -1.
+
+            2) Labels are returned in a list state.
+
+                Only images associated with valid labels (that is, not equal to -1)
+                are present.
+
+            3) Only loading images when needed
+        """
+
         curr_data_matched = self.data_matched[batch_idx]
         curr_batch_size = len(curr_data_matched)
 
-        data_match_tensor = []
-        label_match_tensor = []
+        # Changed to have flat and table versions
+        data_match = []
+        label_match = []
 
         for idx in range(curr_batch_size):
 
@@ -203,8 +224,9 @@ class BaseAlgo:
 
             for d_i in range(len(curr_data_matched[idx])):
 
-                # Changed to continue if there is no example for this domain
+                # Changed to add empty
                 if not curr_data_matched[idx][d_i]:
+                    label_temp.append(torch.Tensor([-1]))
                     continue
 
                 key = random.choice(curr_data_matched[idx][d_i])
@@ -220,13 +242,15 @@ class BaseAlgo:
                 )
                 label_temp.append(self.domain_data[d_i]["label"][key])
 
-            data_match_tensor.append(torch.stack(data_temp))
-            label_match_tensor.append(torch.stack(label_temp))
+            # Changed to remove torch.stack() since some are empty
+            # Changed to have both flat and table versions
+            data_match.extend(torch.stack(data_temp))
+            label_match.append(torch.stack(label_temp))
 
-        data_match_tensor = torch.stack(data_match_tensor)
-        label_match_tensor = torch.stack(label_match_tensor)
+        data_match = torch.stack(data_match)
+        label_match = torch.stack(label_match)
 
-        return data_match_tensor, label_match_tensor, curr_batch_size
+        return data_match, label_match, curr_batch_size
 
     def get_test_accuracy(self, case):
 
