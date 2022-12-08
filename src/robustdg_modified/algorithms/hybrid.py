@@ -10,6 +10,7 @@ from robustdg_modified.config.args_mock import ArgsMock
 from robustdg_modified.utils.helper import cosine_similarity
 
 from .base_algo import BaseAlgo, TrainValTest
+from .utils.valid_index import get_desired_entries_in_both_columns
 
 
 class Hybrid(BaseAlgo):
@@ -153,8 +154,10 @@ class Hybrid(BaseAlgo):
         )
 
         save_path = base_res_dir + "/Model_" + self.ctr_load_post_string + ".pth"
-        self.ctr_phi.load_state_dict(torch.load(save_path))
-        self.ctr_phi.eval()
+
+        if Path(save_path).exists():
+            self.ctr_phi.load_state_dict(torch.load(save_path))
+            self.ctr_phi.eval()
 
         # Inferred Match Case
         if self.args.match_case == -1:
@@ -170,6 +173,11 @@ class Hybrid(BaseAlgo):
         return data_matched, domain_data
 
     def train(self):
+
+        """
+        Changed to allow invalid images, that is, to allow that some
+        entries from self.get_match_function_batch() do not exist.
+        """
 
         for run_erm in range(self.args.n_runs_matchdg_erm):
 
@@ -247,71 +255,59 @@ class Hybrid(BaseAlgo):
                             label_match_tensor,
                             curr_batch_size,
                         ) = self.get_match_function_batch(batch_idx)
-                        data_match = data_match_tensor.to(self.cuda)
-                        data_match = data_match.flatten(start_dim=0, end_dim=1)
-                        feat_match = self.phi(data_match)
 
-                        label_match = label_match_tensor.to(self.cuda)
-                        label_match = torch.squeeze(
-                            label_match.flatten(start_dim=0, end_dim=1)
-                        )
+                        data_match = data_match_tensor.to(self.cuda)
+                        feat_match = self.phi(data_match)
+                        #                     print(feat_match.shape)
+
+                        # Filter valid labels
+                        valid_labels = label_match_tensor >= 0
+                        label_match = label_match_tensor[valid_labels].to(self.cuda)
 
                         erm_loss += F.cross_entropy(feat_match, label_match.long()).to(
                             self.cuda
                         )
                         penalty_erm += float(erm_loss)
+                        loss_e += erm_loss
 
                         train_acc += torch.sum(
                             torch.argmax(feat_match, dim=1) == label_match
                         ).item()
                         train_size += label_match.shape[0]
 
-                        # Creating tensor of shape
-                        #   (domain size, total domains, feat size)
-                        feat_match = torch.stack(
-                            torch.split(feat_match, len(self.train_domains))
-                        )
-                        label_match = torch.stack(
-                            torch.split(label_match, len(self.train_domains))
-                        )
+                        train_size += label_match.shape[0]
 
                         # Positive Match Loss
                         pos_match_counter = 0
-                        for d_i in range(feat_match.shape[1]):
+                        for d_i in range(valid_labels.shape[1]):
                             #                 if d_i != base_domain_idx:
                             #                     continue
-                            for d_j in range(feat_match.shape[1]):
+                            for d_j in range(valid_labels.shape[1]):
+
+                                # Use valid labels to detect which
+                                # images should be used
+                                mask_i, mask_j = get_desired_entries_in_both_columns(
+                                    valid_labels, d_i, d_j
+                                )
+
+                                feat_i = feat_match[mask_i]
+                                feat_j = feat_match[mask_j]
+
                                 if d_j > d_i:
                                     if self.args.pos_metric == "l2":
                                         wasserstein_loss += torch.sum(
-                                            torch.sum(
-                                                (
-                                                    feat_match[:, d_i, :]
-                                                    - feat_match[:, d_j, :]
-                                                )
-                                                ** 2,
-                                                dim=1,
-                                            )
+                                            (feat_i - feat_j) ** 2
                                         )
                                     elif self.args.pos_metric == "l1":
                                         wasserstein_loss += torch.sum(
-                                            torch.sum(
-                                                torch.abs(
-                                                    feat_match[:, d_i, :]
-                                                    - feat_match[:, d_j, :]
-                                                ),
-                                                dim=1,
-                                            )
+                                            torch.abs(feat_i - feat_j)
                                         )
                                     elif self.args.pos_metric == "cos":
                                         wasserstein_loss += torch.sum(
-                                            cosine_similarity(
-                                                feat_match[:, d_i, :],
-                                                feat_match[:, d_j, :],
-                                            )
+                                            cosine_similarity(feat_i, feat_j)
                                         )
 
-                                    pos_match_counter += feat_match.shape[0]
+                                    pos_match_counter += feat_i.shape[0]
 
                         wasserstein_loss = wasserstein_loss / pos_match_counter
                         penalty_ws += float(wasserstein_loss)
