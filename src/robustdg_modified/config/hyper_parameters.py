@@ -1,0 +1,11 @@
+# DataLoader
+BATCH_SIZE = 16
+DATALOADER_NUM_WORKERS = 4
+
+# Neural Network
+DROPOUT_RATE = 0.25
+
+#   SGD Optimizer
+LEARNING_RATE = 2e-4
+WEIGHT_DECAY = 5e-4
+MOMENTUM = 0.9

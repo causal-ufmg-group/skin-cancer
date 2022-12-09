@@ -1,7 +1,0 @@
-# DataLoader
-BATCH_SIZE = 16
-DATALOADER_NUM_WORKERS = 4
-
-# Neural Network
-LEARNING_RATE = 2e-4
-DROPOUT_RATE = 0.25

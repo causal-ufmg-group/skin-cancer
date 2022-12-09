@@ -19,4 +19,5 @@ dependencies:
     - jupyter
     - pip
     - pip:
+        - more-itertools
         - grad-cam
