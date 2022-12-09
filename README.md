@@ -39,7 +39,7 @@ A lot of the configuration were taken from:
 - `robustdg/reproduce_scripts/pacs_run.py`
 - `robustdg/docs/reproduce_results.ipynb`
 
-Our dataset classes (described in [Changes](#changes)), were based off of:
+Our dataset classes (described in [Changes](#changes)) were based off of:
 
 - `robustdg/data/data_loader.py`
 - `robustdg/data/mnist_loader.py`
