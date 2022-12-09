@@ -68,6 +68,8 @@ One of the main reasons, we modified (see [Changes](#changes)) their work was to
 
 **Specific:**
 
+Should be run before start training since they prepare all datasets.
+
 - `src/data_aumentation.ipynb` and `src/data_augmentation/`
     - Useful for unbalanced datasets
     - It was used for some simple data augmentation to balance our skin-cancer train dataset a bit. 
