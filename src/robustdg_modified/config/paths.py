@@ -9,6 +9,9 @@ LABELS_CSV = {
         / "ISIC2018_Task3_Training_GroundTruth"
         / "ISIC2018_Task3_Training_GroundTruth.csv"
     ),
+    "augmented_train": (
+        CWD.parent / "data" / "Augmented_Dataset" / "Augmented_Training_GroundTruth.csv"
+    ),
     "test": (
         CWD.parent
         / "data"
@@ -27,6 +30,7 @@ DOMAIN_TRAIN_CSV = (
 
 IMG_DIR = {
     "train": CWD.parent / "data" / "ISIC2018_Task3_Training_Input/",
+    "augmented_train": CWD.parent / "data" / "Augmented_Dataset/",
     "test": CWD.parent / "data" / "ISIC2018_Task3_Validation_Input/",
 }
 
