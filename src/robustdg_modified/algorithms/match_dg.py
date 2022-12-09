@@ -597,7 +597,9 @@ class MatchDG(BaseAlgo):
                 self.val_acc.append(self.get_test_accuracy("val"))
 
                 # Test Dataset Accuracy
-                self.final_acc.append(self.get_test_accuracy("test"))
+                # Only do test in the end to reduce computational cost
+                # self.final_acc.append(self.get_test_accuracy("test"))
+                self.final_acc.append([])
 
                 # Save the model if current best epoch as per validation loss
                 if self.val_acc[-1] > self.max_val_acc:
