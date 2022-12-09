@@ -48,5 +48,5 @@ def get_information_per_domain_label(
     return pd.concat(
         [img_names_per_domain_label, img_names_per_domain_label.apply(len)],
         axis=1,
-        keys=["names", "size"],
+        keys=[img_names, "size"],
     )
