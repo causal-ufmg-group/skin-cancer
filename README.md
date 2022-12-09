@@ -1,4 +1,4 @@
-# **skin-cancer**
+# **Domain Generalization in Skin-Cancer Image Classification**
 
 ## **Getting Started**
 ---
