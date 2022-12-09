@@ -2,37 +2,17 @@ from pathlib import Path
 
 CWD = Path().absolute()
 
+CSV_DIR = CWD.parent / "data" / "csv_files"
+
 LABELS_CSV = {
-    "train": (
-        CWD.parent
-        / "data"
-        / "ISIC2018_Task3_Training_GroundTruth"
-        / "ISIC2018_Task3_Training_GroundTruth.csv"
-    ),
-    "augmented_train": (
-        CWD.parent / "data" / "Augmented_Dataset" / "Augmented_Training_GroundTruth.csv"
-    ),
-    "test": (
-        CWD.parent
-        / "data"
-        / "ISIC2018_Task3_Validation_GroundTruth"
-        / "ISIC2018_Task3_Validation_GroundTruth.csv"
-    ),
+    "train": CSV_DIR / "ISIC2018_Task3_Training_GroundTruth.csv",
+    "augmented_train": CSV_DIR / "Augmented_Training_GroundTruth.csv",
+    "test": CSV_DIR / "Testing_GroundTruth.csv",
 }
 
 DOMAIN_TRAIN_CSV = {
-    "train": (
-        CWD.parent
-        / "data"
-        / "ISIC2018_Task3_Training_GroundTruth"
-        / "ISIC2018_Task3_Training_LesionGroupings.csv"
-    ),
-    "augmented_train": (
-        CWD.parent
-        / "data"
-        / "Augmented_Dataset"
-        / "Augmented_Training_Domain.csv"
-    )
+    "train": CSV_DIR / "ISIC2018_Task3_Training_LesionGroupings.csv",
+    "augmented_train": CSV_DIR / "Augmented_Training_Domain.csv",
 }
 
 
