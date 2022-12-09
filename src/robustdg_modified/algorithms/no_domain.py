@@ -101,8 +101,8 @@ class NoDomain(BaseAlgo):
             self.opt.zero_grad()
 
             # Make predictions for this batch
-            x_e = x_e.to(self.cuda)
-            y_e = y_e.to(self.cuda)
+            x_e = x_e.to(self.cuda).float()
+            y_e = y_e.to(self.cuda).float()
 
             outputs = self.phi(x_e)
 
