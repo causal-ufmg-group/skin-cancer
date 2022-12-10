@@ -44,7 +44,7 @@ def set_configuration_parameters(args: ArgsMock, key_values: dict[str, Any]) -> 
 
 
 # OUT CONFIGURATIONS
-NO_DOMAIN_CONFIG = {"method_name": "no_domain"}
+NO_DOMAIN_CONFIG = {"method_name": "no_domain", "epochs": 40}
 
 # ROBUSTDG CONFIGURATIONS:
 #   robustdg/notebooks/reproduce_results.ipynb
@@ -65,7 +65,7 @@ BASELINE_ERM_CONFIG = {
     "method_name": "erm_match",
     "penalty_ws": 0,
     "match_case": 0,
-    "epochs": 25,
+    "epochs": 40,
 }
 
 PERFECT_MATCH_CONFIG = {
