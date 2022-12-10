@@ -72,7 +72,7 @@ PERFECT_MATCH_CONFIG = {
     "method_name": "erm_match",
     "penalty_ws": 0.1,
     "match_case": 1,
-    "epochs": 25,
+    "epochs": 40,
 }
 
 # DOMAIN GENERALIZATION VIA CAUSAL MATCHING
@@ -105,7 +105,7 @@ MATCH_DG_ERM_CONFIG = {
     "ctr_match_case": 0,
     "ctr_match_flag": 1,
     "ctr_match_interrupt": 5,
-    "epochs": 25,
+    "epochs": 40,
     "weight_decay": 0.001,
 }
 
