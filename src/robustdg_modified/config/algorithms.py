@@ -44,7 +44,7 @@ def set_configuration_parameters(args: ArgsMock, key_values: dict[str, Any]) -> 
 
 
 # OUT CONFIGURATIONS
-NO_DOMAIN_CONFIG = {"method_name": "no_domain", "epochs": 40}
+NO_DOMAIN_CONFIG = {"method_name": "no_domain", "epochs": 25}
 
 # ROBUSTDG CONFIGURATIONS:
 #   robustdg/notebooks/reproduce_results.ipynb
@@ -65,14 +65,14 @@ BASELINE_ERM_CONFIG = {
     "method_name": "erm_match",
     "penalty_ws": 0,
     "match_case": 0,
-    "epochs": 40,
+    "epochs": 25,
 }
 
 PERFECT_MATCH_CONFIG = {
     "method_name": "erm_match",
     "penalty_ws": 0.1,
     "match_case": 1,
-    "epochs": 40,
+    "epochs": 25,
 }
 
 # DOMAIN GENERALIZATION VIA CAUSAL MATCHING
@@ -92,7 +92,7 @@ MATCH_DG_CTR_CONFIG = {
     "method_name": "matchdg_ctr",
     "match_case": 0,
     "match_flag": 1,
-    "epochs": 50,
+    "epochs": 40,
     "pos_metric": "cos",
     "match_func_aug_case": 1,
 }
@@ -105,7 +105,7 @@ MATCH_DG_ERM_CONFIG = {
     "ctr_match_case": 0,
     "ctr_match_flag": 1,
     "ctr_match_interrupt": 5,
-    "epochs": 40,
+    "epochs": 25,
     "weight_decay": 0.001,
 }
 
@@ -119,6 +119,6 @@ HYBRID_CONFIG = {
     "ctr_match_case": 0,
     "ctr_match_flag": 1,
     "ctr_match_interrupt": 5,
-    "epochs": 50,
+    "epochs": 30,
     "weight_decay": 0.001,
 }
