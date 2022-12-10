@@ -50,6 +50,7 @@ NO_DOMAIN_CONFIG = {"method_name": "no_domain"}
 #   robustdg/notebooks/reproduce_results.ipynb
 #   robustdg/reproduce_scripts/mnist_run.py
 #   robustdg/reproduce_scripts/pacs_run.py
+# Most of them were adapted for perfect match.
 
 # ERM
 
@@ -69,7 +70,7 @@ BASELINE_ERM_CONFIG = {
 
 PERFECT_MATCH_CONFIG = {
     "method_name": "erm_match",
-    "penalty_ws": 10,
+    "penalty_ws": 0.1,
     "match_case": 1,
     "epochs": 25,
 }
@@ -113,7 +114,7 @@ MATCH_DG_ERM_CONFIG = {
 HYBRID_CONFIG = {
     "method_name": "hybrid",
     "penalty_ws": 0.1,
-    "match_case": -1,
+    "match_case": 1,
     # "ctr_model_name": "", ## this is be set when selecting the model
     "ctr_match_case": 0,
     "ctr_match_flag": 1,
