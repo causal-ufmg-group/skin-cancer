@@ -169,20 +169,7 @@ class MatchDG(BaseAlgo):
 
     def init_erm_phase(self):
 
-        # Load MatchDG CTR phase model from the saved weights
-        base_res_dir = (
-            "results/"
-            + self.args.dataset_name
-            + "/"
-            + "matchdg_ctr"
-            + "/"
-            + self.args.ctr_match_layer
-            + "/"
-            + "train_"
-            + str(self.args.train_domains)
-        )
-
-        save_path = base_res_dir + "/Model_" + self.ctr_load_post_string + ".pth"
+        save_path = self.base_res_dir + "/Model_" + self.ctr_save_post_string + ".pth"
 
         if Path(save_path).exists():
             self.ctr_phi.load_state_dict(torch.load(save_path))
