@@ -82,7 +82,7 @@ class ErmMatch(BaseAlgo):
 
         super().__init__(
             args,
-            post_string,
+            f"ERM_MATCH_{post_string}",
             cuda,
             base_res_dir,
             model,

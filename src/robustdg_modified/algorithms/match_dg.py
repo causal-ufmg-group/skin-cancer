@@ -146,7 +146,10 @@ class MatchDG(BaseAlgo):
         # Store the weights of the model
         torch.save(
             self.phi.state_dict(),
-            self.base_res_dir + "/Model_" + self.ctr_save_post_string + ".pth",
+            self.base_res_dir
+            + "/Model_MATCH_DG_CTR_"
+            + self.ctr_save_post_string
+            + ".pth",
         )
 
     def save_model_erm_phase(self, run):
@@ -160,7 +163,7 @@ class MatchDG(BaseAlgo):
             self.base_res_dir
             + "/"
             + self.ctr_load_post_string
-            + "/Model_"
+            + "/Model_MATCH_DG_ERM_"
             + self.post_string
             + "_"
             + str(run)
@@ -169,7 +172,12 @@ class MatchDG(BaseAlgo):
 
     def init_erm_phase(self):
 
-        save_path = self.base_res_dir + "/Model_" + self.ctr_save_post_string + ".pth"
+        save_path = (
+            self.base_res_dir
+            + "/Model_MATCH_DG_CTR_"
+            + self.ctr_save_post_string
+            + ".pth"
+        )
 
         if Path(save_path).exists():
             self.ctr_phi.load_state_dict(torch.load(save_path))
