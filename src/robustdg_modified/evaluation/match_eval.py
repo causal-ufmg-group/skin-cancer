@@ -156,6 +156,6 @@ class MatchEval:
             f"Perfect Match Score:  {self.metric_score['Perfect Match Score']}"
         )
         logging.info(
-            "TopK Perfect Match Score: ", self.metric_score["TopK Perfect Match Score"]
+            f"TopK Perfect Match Score: {self.metric_score['TopK Perfect Match Score']}"
         )
         logging.info(f"Perfect Match Rank:  {self.metric_score['Perfect Match Rank']}")
