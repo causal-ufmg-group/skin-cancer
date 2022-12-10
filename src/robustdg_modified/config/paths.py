@@ -19,7 +19,7 @@ DOMAIN_TRAIN_CSV = {
 IMG_DIR = {
     "train": CWD.parent / "data" / "ISIC2018_Task3_Training_Input/",
     "augmented_train": CWD.parent / "data" / "Augmented_Dataset/",
-    "test": CWD.parent / "data" / "ISIC2018_Task3_Validation_Input/",
+    "test": CWD.parent / "data" / "ISIC_2019_Training_Input/",
 }
 
 LOG_DIR = CWD.parent / "logs/"
