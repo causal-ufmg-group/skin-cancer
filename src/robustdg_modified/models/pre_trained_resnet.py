@@ -21,7 +21,10 @@ class PreTrainedResNet18(nn.Module):
 
         set_requires_grad_for_all_parameters(pre_trained, value=False)
 
-        # adding last fc layer with correct number of classes
+        # fine-tune last convolutional layer
+        pre_trained.layer4.requires_grad_(True)
+
+        # fine-tune last fc layer with correct number of classes
         in_features_fc = pre_trained.fc.in_features
         pre_trained.fc = nn.Linear(in_features_fc, num_classes)
 
