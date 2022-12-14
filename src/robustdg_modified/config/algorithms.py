@@ -44,7 +44,7 @@ def set_configuration_parameters(args: ArgsMock, key_values: dict[str, Any]) -> 
 
 
 # OUT CONFIGURATIONS
-NO_DOMAIN_CONFIG = {"method_name": "no_domain", "epochs": 25}
+NO_DOMAIN_CONFIG = {"method_name": "no_domain", "epochs": 50}
 
 # ROBUSTDG CONFIGURATIONS:
 #   robustdg/notebooks/reproduce_results.ipynb
@@ -65,14 +65,15 @@ BASELINE_ERM_CONFIG = {
     "method_name": "erm_match",
     "penalty_ws": 0,
     "match_case": 0,
-    "epochs": 25,
+    "epochs": 50,
 }
 
 PERFECT_MATCH_CONFIG = {
     "method_name": "erm_match",
+    # Reduzir o peso da configuração?
     "penalty_ws": 0.1,
     "match_case": 1,
-    "epochs": 25,
+    "epochs": 50,
 }
 
 # DOMAIN GENERALIZATION VIA CAUSAL MATCHING
@@ -105,7 +106,7 @@ MATCH_DG_ERM_CONFIG = {
     "ctr_match_case": 0,
     "ctr_match_flag": 1,
     "ctr_match_interrupt": 5,
-    "epochs": 25,
+    "epochs": 50,
     "weight_decay": 0.001,
 }
 
